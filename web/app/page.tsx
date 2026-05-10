@@ -5,30 +5,32 @@ export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4">
       <section className="flex flex-wrap gap-2">
-        <Link href="/history" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        <Link href="/history" className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-900">
           Historique semaine
         </Link>
-        <Link href="/rewards" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        <Link href="/rewards" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
           Récompenses rachetées
         </Link>
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
-        <h1 className="text-xl font-semibold">Dashboard famille</h1>
-        <p className="text-sm text-neutral-600">
+      <section className="soft-card p-4">
+        <h1 className="text-2xl font-bold text-slate-900">Dashboard famille</h1>
+        <p className="text-sm text-slate-600">
           Base Next.js connectée à Neon pour stockage partagé.
         </p>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
         {children.map((child) => (
-          <article key={child.id} className="rounded-xl border border-neutral-200 bg-white p-4">
-            <h2 className="font-semibold">{child.name}</h2>
-            <p className="text-sm text-neutral-600">Monnaie: {child.currency}</p>
+          <article key={child.id} className="soft-card p-4">
+            <h2 className="font-semibold text-slate-900">{child.name}</h2>
+            <p className="text-sm text-slate-600">Monnaie: {child.currency}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link
                 href={`/${child.id}`}
-                className="inline-block rounded-lg bg-neutral-900 px-3 py-2 text-sm text-white"
+                className={`inline-block rounded-lg px-3 py-2 text-sm text-white ${
+                  child.id === "lisandro" ? "bg-violet-700 hover:bg-violet-800" : "bg-teal-700 hover:bg-teal-800"
+                }`}
               >
                 Faire le check-in
               </Link>

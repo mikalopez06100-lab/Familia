@@ -27,11 +27,13 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
   const rewards = getRulesByType(childId, "reward");
   const routines = childRoutines[childId];
   const planning = childPlanning[childId];
+  const accentClass = childId === "lisandro" ? "from-violet-700 to-violet-500" : "from-teal-700 to-teal-500";
+  const accentSoftClass = childId === "lisandro" ? "border-violet-200 bg-violet-50" : "border-teal-200 bg-teal-50";
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
       <section className="flex flex-wrap gap-2">
-        <Link href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        <Link href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm">
           ← Accueil
         </Link>
         <Link href={`/${childId}#routine`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
@@ -45,18 +47,18 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         </Link>
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
-        <h1 className="text-xl font-semibold">{child.name}</h1>
-        <p className="text-sm text-neutral-500">Check-in quotidien</p>
+      <section className={`rounded-xl border ${accentSoftClass} p-4 shadow-sm`}>
+        <h1 className="text-2xl font-bold text-slate-900">{child.name}</h1>
+        <p className="text-sm text-slate-600">Check-in quotidien</p>
         <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
-          <div>Jour: <strong>{dayScore} {child.currency}</strong></div>
-          <div>Semaine: <strong>{weekScore} {child.currency}</strong></div>
-          <div>Solde: <strong>{balance} {child.currency}</strong></div>
+          <div className="rounded-md bg-white/80 px-2 py-1">Jour: <strong>{dayScore} {child.currency}</strong></div>
+          <div className="rounded-md bg-white/80 px-2 py-1">Semaine: <strong>{weekScore} {child.currency}</strong></div>
+          <div className="rounded-md bg-white/80 px-2 py-1">Solde: <strong>{balance} {child.currency}</strong></div>
         </div>
       </section>
 
       <section className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-xl border border-neutral-200 bg-white p-3">
+        <div className="soft-card p-3">
           <h2 className="mb-2 text-sm font-semibold">Gains (toggle)</h2>
           <div className="space-y-2">
             {gains.map((rule) => (
@@ -78,7 +80,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-3">
+        <div className="soft-card p-3">
           <h2 className="mb-2 text-sm font-semibold">Pertes (multiples)</h2>
           <div className="space-y-2">
             {losses.map((rule) => (
@@ -96,7 +98,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-3">
+        <div className="soft-card p-3">
           <h2 className="mb-2 text-sm font-semibold">Récompenses</h2>
           <div className="space-y-2">
             {rewards.map((rule) => {
@@ -120,7 +122,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         </div>
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-3">
+      <section className="soft-card p-3">
         <h2 className="mb-2 text-sm font-semibold">Historique du jour</h2>
         <div className="space-y-2">
           {todayItems.length === 0 && (
@@ -149,7 +151,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
       </section>
 
       <section className="grid gap-3 md:grid-cols-2">
-        <div id="routine" className="rounded-xl border border-neutral-200 bg-white p-3 scroll-mt-4">
+        <div id="routine" className="soft-card scroll-mt-4 p-3">
           <h2 className="mb-2 text-sm font-semibold">Routine quotidienne</h2>
           <ol className="space-y-2 pl-5 text-sm">
             {routines.map((step, index) => (
@@ -160,7 +162,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
           </ol>
         </div>
 
-        <div id="planning" className="rounded-xl border border-neutral-200 bg-white p-3 scroll-mt-4">
+        <div id="planning" className="soft-card scroll-mt-4 p-3">
           <h2 className="mb-2 text-sm font-semibold">Planning hebdomadaire</h2>
           <div className="space-y-2">
             {planning.map((day) => (
@@ -178,7 +180,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
       </section>
 
       <section className="pb-2">
-        <Link href="/" className="inline-block rounded-lg bg-neutral-900 px-3 py-2 text-sm text-white">
+        <Link href="/" className={`inline-block rounded-lg bg-gradient-to-r px-3 py-2 text-sm text-white ${accentClass}`}>
           Retour à l&apos;accueil
         </Link>
       </section>
