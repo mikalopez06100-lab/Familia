@@ -2,7 +2,7 @@
 
 import { ChildId } from "@/lib/types";
 import { useFamilyStore, getChild, getRulesByType } from "@/stores/useFamilyStore";
-import { routinesPlanningByChild } from "@/lib/routines-planning";
+import { childPlanning, childRoutines } from "@/lib/family-content";
 
 export default function CheckInView({ childId }: { childId: ChildId }) {
   const child = getChild(childId);
@@ -24,7 +24,8 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
   const gains = getRulesByType(childId, "gain");
   const losses = getRulesByType(childId, "loss");
   const rewards = getRulesByType(childId, "reward");
-  const structure = routinesPlanningByChild[childId];
+  const routines = childRoutines[childId];
+  const planning = childPlanning[childId];
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
@@ -135,8 +136,8 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         <div className="rounded-xl border border-neutral-200 bg-white p-3">
           <h2 className="mb-2 text-sm font-semibold">Routine quotidienne</h2>
           <ol className="space-y-2 pl-5 text-sm">
-            {structure.routines.map((step) => (
-              <li key={step} className="list-decimal">
+            {routines.map((step, index) => (
+              <li key={`${childId}-routine-${index}`} className="list-decimal">
                 {step}
               </li>
             ))}
@@ -146,12 +147,12 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         <div className="rounded-xl border border-neutral-200 bg-white p-3">
           <h2 className="mb-2 text-sm font-semibold">Planning hebdomadaire</h2>
           <div className="space-y-2">
-            {structure.planning.map((dayPlan) => (
-              <div key={dayPlan.day} className="rounded-lg border border-neutral-200 p-2">
-                <p className="text-sm font-semibold">{dayPlan.day}</p>
-                <ul className="mt-1 list-disc pl-5 text-xs text-neutral-600">
-                  {dayPlan.items.map((item) => (
-                    <li key={item}>{item}</li>
+            {planning.map((day) => (
+              <div key={`${childId}-${day.day}`} className="rounded-lg border border-neutral-200 p-2">
+                <p className="text-sm font-semibold">{day.day}</p>
+                <ul className="mt-1 list-disc pl-4 text-xs text-neutral-700">
+                  {day.events.map((event) => (
+                    <li key={`${childId}-${day.day}-${event}`}>{event}</li>
                   ))}
                 </ul>
               </div>
