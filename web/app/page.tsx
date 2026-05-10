@@ -216,6 +216,52 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <section className="soft-card p-3">
+        <h3 className="mb-3 text-sm font-semibold">Toutes les règles (Lisandro + Mila)</h3>
+        <div className="grid gap-3 md:grid-cols-2">
+          {children.map((child) => {
+            const childGains = rules.filter((r) => r.childId === child.id && r.type === "gain");
+            const childLosses = rules.filter((r) => r.childId === child.id && r.type === "loss");
+            const childRewards = rules.filter((r) => r.childId === child.id && r.type === "reward");
+            return (
+              <div key={`all-rules-${child.id}`} className="rounded-lg border border-neutral-200 bg-white p-3">
+                <h4 className="mb-2 text-sm font-semibold">{child.name}</h4>
+
+                <p className="mb-1 text-xs font-semibold text-emerald-700">Gains</p>
+                <ul className="mb-3 space-y-1 text-xs text-neutral-700">
+                  {childGains.map((r) => (
+                    <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-emerald-100 bg-emerald-50 px-2 py-1">
+                      <span>{r.label}</span>
+                      <span className="font-semibold">+{r.value}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mb-1 text-xs font-semibold text-red-700">Pertes</p>
+                <ul className="mb-3 space-y-1 text-xs text-neutral-700">
+                  {childLosses.map((r) => (
+                    <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-red-100 bg-red-50 px-2 py-1">
+                      <span>{r.label}</span>
+                      <span className="font-semibold">{r.value}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mb-1 text-xs font-semibold text-amber-700">Récompenses</p>
+                <ul className="space-y-1 text-xs text-neutral-700">
+                  {childRewards.map((r) => (
+                    <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-amber-100 bg-amber-50 px-2 py-1">
+                      <span>{r.label}</span>
+                      <span className="font-semibold">-{r.rewardCost ?? 0}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </main>
   );
 }
