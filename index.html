@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Famille Lopez - App Barkley</title>
+  <style>
+    :root {
+      --bg: #faf7f2;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --gain-bg: #d1fae5;
+      --gain-fg: #065f46;
+      --loss-bg: #fee2e2;
+      --loss-fg: #991b1b;
+      --reward-bg: #fef3c7;
+      --reward-fg: #92400e;
+      --lisandro: #5b21b6;
+      --mila: #0f766e;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    header {
+      background: #1e2d3d;
+      color: #fff;
+      padding: 18px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--shadow);
+    }
+    header h1 { margin: 0; font-size: 18px; }
+    header p { margin: 4px 0 0; color: #cbd5e1; font-size: 13px; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .grid { display: grid; gap: 14px; }
+    .summary { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header { padding: 12px 14px; font-weight: 700; color: #fff; }
+    .lisandro-bg { background: linear-gradient(135deg, #6d28d9, #4c1d95); }
+    .mila-bg { background: linear-gradient(135deg, #0f766e, #115e59); }
+    .card-body { padding: 12px 14px; }
+    .stat { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+    .stat:last-child { border-bottom: 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .strong { font-weight: 700; }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 10px;
+      min-height: 44px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button:hover { border-color: #cbd5e1; }
+    button.active-tab { background: #111827; color: #fff; border-color: #111827; }
+    button.primary { background: #111827; color: #fff; border-color: #111827; }
+    button.danger { background: #7f1d1d; color: #fff; border-color: #7f1d1d; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .sections {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    .section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .section h2 { margin: 0 0 10px; font-size: 15px; }
+
+    .rule-list { display: grid; gap: 8px; }
+    .rule-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+      width: 100%;
+      min-height: 52px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    .rule-btn.gain { background: #f0fdf4; }
+    .rule-btn.loss { background: #fff7f7; }
+    .rule-btn.reward { background: #fffbeb; }
+    .rule-btn.toggled { outline: 2px solid #10b981; }
+
+    .badge {
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 12px;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+    .badge.gain { background: var(--gain-bg); color: var(--gain-fg); }
+    .badge.loss { background: var(--loss-bg); color: var(--loss-fg); }
+    .badge.reward { background: var(--reward-bg); color: var(--reward-fg); }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px dashed var(--border);
+      padding: 8px 0;
+      font-size: 13px;
+    }
+    .history-item:last-child { border-bottom: 0; }
+    .toast {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      background: #111827;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      display: none;
+      z-index: 20;
+    }
+
+    @media (max-width: 700px) {
+      .sections { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Famille Lopez - Gestion Barkley</h1>
+    <p>Check-in quotidien rapide (mobile first) - persistance locale</p>
+  </header>
+
+  <main>
+    <section class="grid summary" id="summary"></section>
+
+    <section class="card" style="margin-top: 14px;">
+      <div class="card-body">
+        <div class="toolbar">
+          <button id="tab-lisandro" class="active-tab">Lisandro</button>
+          <button id="tab-mila">Mila</button>
+          <button id="btn-export">Exporter JSON</button>
+          <button id="btn-import">Importer JSON</button>
+          <button id="btn-reset-day" class="danger">Réinitialiser les toggles du jour</button>
+        </div>
+        <p class="muted" id="active-meta"></p>
+      </div>
+    </section>
+
+    <section class="sections" style="margin-top: 12px;">
+      <div class="section">
+        <h2>Gains (1x/jour en toggle)</h2>
+        <div class="rule-list" id="gains"></div>
+      </div>
+      <div class="section">
+        <h2>Pertes (multiples)</h2>
+        <div class="rule-list" id="losses"></div>
+      </div>
+      <div class="section">
+        <h2>Récompenses</h2>
+        <div class="rule-list" id="rewards"></div>
+      </div>
+      <div class="section">
+        <h2>Historique du jour</h2>
+        <div id="history"></div>
+      </div>
+    </section>
+  </main>
+
+  <input id="import-file" type="file" accept="application/json" style="display:none" />
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const LS_KEY = "famille_barkley_v1";
+    const PARENT = "michael";
+
+    const dataSeed = {
+      children: [
+        {
+          id: "lisandro",
+          name: "Lisandro",
+          currency: "pts",
+          colorClass: "lisandro-bg",
+          rules: {
+            gains: [
+              { id: "l_g1", label: "Routine retour college complete", value: 3 },
+              { id: "l_g2", label: "Devoirs termines avant 18h", value: 2 },
+              { id: "l_g3", label: "Chambre + lit faits", value: 2 },
+              { id: "l_g4", label: "Telephone rendu a 20h", value: 3 },
+              { id: "l_g5", label: "Tache hebdo faite", value: 2 },
+              { id: "l_g6", label: "Attitude cooperative", value: 2 }
+            ],
+            losses: [
+              { id: "l_p1", label: "Telephone non rendu a 20h", value: -4 },
+              { id: "l_p2", label: "Routine retour non faite", value: -3 },
+              { id: "l_p3", label: "Chambre non faite", value: -2 },
+              { id: "l_p4", label: "Attitude irrespectueuse", value: -5 },
+              { id: "l_p5", label: "Telephone utilise apres 20h", value: -10 }
+            ],
+            rewards: [
+              { id: "l_r1", label: "Choix du film vendredi", cost: 10 },
+              { id: "l_r2", label: "+30 min telephone samedi", cost: 15 },
+              { id: "l_r3", label: "Sortie avec les amis (2h)", cost: 20 },
+              { id: "l_r4", label: "Argent de poche +5EUR", cost: 30 },
+              { id: "l_r5", label: "Activite speciale", cost: 50 }
+            ]
+          }
+        },
+        {
+          id: "mila",
+          name: "Mila",
+          currency: "etoiles",
+          colorClass: "mila-bg",
+          rules: {
+            gains: [
+              { id: "m_g1", label: "Exercices ortho faits", value: 3 },
+              { id: "m_g2", label: "Chambre + lit faits", value: 2 },
+              { id: "m_g3", label: "Gouter prepare seule", value: 1 },
+              { id: "m_g4", label: "Douche sans rappel", value: 2 },
+              { id: "m_g5", label: "Douche + cheveux sans crise", value: 3 },
+              { id: "m_g6", label: "Tache hebdo faite", value: 2 },
+              { id: "m_g7", label: "Prete a l'heure le matin", value: 2 },
+              { id: "m_g8", label: "Minuteur douche lance seule", value: 1 }
+            ],
+            losses: [
+              { id: "m_p1", label: "Exercices ortho non faits", value: -3 },
+              { id: "m_p2", label: "Chambre non faite", value: -2 },
+              { id: "m_p3", label: "Refus douche / crise TOP", value: -3 },
+              { id: "m_p4", label: "Comportement irrespectueux", value: -3 }
+            ],
+            rewards: [
+              { id: "m_r1", label: "Autocollant collection", cost: 5 },
+              { id: "m_r2", label: "Choix du dessert dimanche", cost: 8 },
+              { id: "m_r3", label: "30 min dessin anime choisi", cost: 10 },
+              { id: "m_r4", label: "Activite speciale avec parent", cost: 15 },
+              { id: "m_r5", label: "Invitation amie a la maison", cost: 20 }
+            ]
+          }
+        }
+      ],
+      transactions: []
+    };
+
+    let state = loadState();
+    let activeChildId = "lisandro";
+
+    const els = {
+      summary: document.getElementById("summary"),
+      gains: document.getElementById("gains"),
+      losses: document.getElementById("losses"),
+      rewards: document.getElementById("rewards"),
+      history: document.getElementById("history"),
+      meta: document.getElementById("active-meta"),
+      tabL: document.getElementById("tab-lisandro"),
+      tabM: document.getElementById("tab-mila"),
+      toast: document.getElementById("toast"),
+      exportBtn: document.getElementById("btn-export"),
+      importBtn: document.getElementById("btn-import"),
+      importFile: document.getElementById("import-file"),
+      resetDay: document.getElementById("btn-reset-day")
+    };
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function weekRange(date = new Date()) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const mondayShift = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() + mondayShift);
+      monday.setHours(0, 0, 0, 0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+      return { monday, sunday };
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return structuredClone(dataSeed);
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed.children || !parsed.transactions) return structuredClone(dataSeed);
+        return parsed;
+      } catch {
+        return structuredClone(dataSeed);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    function toast(msg) {
+      els.toast.textContent = msg;
+      els.toast.style.display = "block";
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => (els.toast.style.display = "none"), 1800);
+    }
+
+    function getChild(childId) {
+      return state.children.find(c => c.id === childId);
+    }
+
+    function childTransactions(childId) {
+      return state.transactions.filter(t => t.childId === childId);
+    }
+
+    function sumValues(list) {
+      return list.reduce((acc, t) => acc + t.value, 0);
+    }
+
+    function balance(childId) {
+      return Math.max(0, sumValues(childTransactions(childId)));
+    }
+
+    function dayScore(childId, dateKey = todayKey()) {
+      return Math.max(0, sumValues(childTransactions(childId).filter(t => t.date === dateKey)));
+    }
+
+    function weekScore(childId) {
+      const { monday, sunday } = weekRange();
+      const items = childTransactions(childId).filter(t => {
+        const dt = new Date(t.date + "T12:00:00");
+        return dt >= monday && dt <= sunday;
+      });
+      return Math.max(0, sumValues(items));
+    }
+
+    function existsTodayGain(childId, ruleId) {
+      return state.transactions.some(t =>
+        t.childId === childId &&
+        t.date === todayKey() &&
+        t.kind === "gain" &&
+        t.ruleId === ruleId
+      );
+    }
+
+    function addTransaction(tx) {
+      state.transactions.push({
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        date: todayKey(),
+        addedBy: PARENT,
+        ...tx
+      });
+      saveState();
+      render();
+    }
+
+    function removeTransactionById(id) {
+      state.transactions = state.transactions.filter(t => t.id !== id);
+      saveState();
+      render();
+    }
+
+    function applyGain(rule) {
+      const already = existsTodayGain(activeChildId, rule.id);
+      if (already) {
+        const tx = state.transactions.find(t =>
+          t.childId === activeChildId && t.date === todayKey() && t.kind === "gain" && t.ruleId === rule.id
+        );
+        if (tx) {
+          removeTransactionById(tx.id);
+          toast("Gain retire");
+        }
+        return;
+      }
+      addTransaction({
+        childId: activeChildId,
+        kind: "gain",
+        ruleId: rule.id,
+        label: rule.label,
+        value: rule.value
+      });
+      toast("Gain ajoute");
+    }
+
+    function applyLoss(rule) {
+      if (!confirm("Confirmer la perte: " + rule.value + " ?")) return;
+      const current = balance(activeChildId);
+      const next = Math.max(0, current + rule.value);
+      const applied = next - current;
+      if (applied === 0) {
+        toast("Solde deja a 0");
+        return;
+      }
+      addTransaction({
+        childId: activeChildId,
+        kind: "loss",
+        ruleId: rule.id,
+        label: rule.label,
+        value: applied
+      });
+      toast("Perte enregistree");
+    }
+
+    function applyReward(reward) {
+      const current = balance(activeChildId);
+      if (current < reward.cost) {
+        toast("Solde insuffisant");
+        return;
+      }
+      if (!confirm("Confirmer le rachat: " + reward.label + " (" + reward.cost + ") ?")) return;
+      addTransaction({
+        childId: activeChildId,
+        kind: "reward",
+        ruleId: reward.id,
+        label: "Rachat: " + reward.label,
+        value: -reward.cost
+      });
+      toast("Recompense validee");
+    }
+
+    function formatTime(iso) {
+      return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function renderSummary() {
+      els.summary.innerHTML = "";
+      state.children.forEach(child => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML =
+          '<div class="card-header ' + child.colorClass + '">' + child.name + "</div>" +
+          '<div class="card-body">' +
+            '<div class="stat"><span class="muted">Score du jour</span><span class="strong">' + dayScore(child.id) + " " + child.currency + "</span></div>" +
+            '<div class="stat"><span class="muted">Score semaine</span><span class="strong">' + weekScore(child.id) + " " + child.currency + "</span></div>" +
+            '<div class="stat"><span class="muted">Solde total</span><span class="strong">' + balance(child.id) + " " + child.currency + "</span></div>" +
+          "</div>";
+        els.summary.appendChild(card);
+      });
+    }
+
+    function renderRules() {
+      const child = getChild(activeChildId);
+      els.meta.textContent = "Enfant actif: " + child.name + " | Date: " + todayKey();
+      els.gains.innerHTML = "";
+      els.losses.innerHTML = "";
+      els.rewards.innerHTML = "";
+
+      child.rules.gains.forEach(rule => {
+        const btn = document.createElement("button");
+        const isToggled = existsTodayGain(activeChildId, rule.id);
+        btn.className = "rule-btn gain" + (isToggled ? " toggled" : "");
+        btn.innerHTML = "<span>" + rule.label + "</span><span class='badge gain'>+" + rule.value + "</span>";
+        btn.onclick = () => applyGain(rule);
+        els.gains.appendChild(btn);
+      });
+
+      child.rules.losses.forEach(rule => {
+        const btn = document.createElement("button");
+        btn.className = "rule-btn loss";
+        btn.innerHTML = "<span>" + rule.label + "</span><span class='badge loss'>" + rule.value + "</span>";
+        btn.onclick = () => applyLoss(rule);
+        els.losses.appendChild(btn);
+      });
+
+      child.rules.rewards.forEach(reward => {
+        const btn = document.createElement("button");
+        btn.className = "rule-btn reward";
+        const hasEnough = balance(activeChildId) >= reward.cost;
+        btn.disabled = !hasEnough;
+        btn.innerHTML = "<span>" + reward.label + "</span><span class='badge reward'>-" + reward.cost + "</span>";
+        btn.onclick = () => applyReward(reward);
+        els.rewards.appendChild(btn);
+      });
+    }
+
+    function renderHistory() {
+      const today = todayKey();
+      const rows = childTransactions(activeChildId)
+        .filter(t => t.date === today)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      if (!rows.length) {
+        els.history.innerHTML = '<p class="muted">Aucune transaction aujourd hui.</p>';
+        return;
+      }
+
+      els.history.innerHTML = "";
+      rows.forEach(t => {
+        const row = document.createElement("div");
+        row.className = "history-item";
+        row.innerHTML =
+          "<div>" +
+            "<div><strong>" + t.label + "</strong></div>" +
+            '<div class="muted">' + formatTime(t.createdAt) + " - " + t.addedBy + "</div>" +
+          "</div>" +
+          "<div>" +
+            "<span class='badge " + (t.value >= 0 ? "gain" : (t.kind === "reward" ? "reward" : "loss")) + "'>" + (t.value > 0 ? "+" : "") + t.value + "</span> " +
+            "<button title='Supprimer'>X</button>" +
+          "</div>";
+        row.querySelector("button").onclick = () => {
+          if (!confirm("Supprimer cette transaction ?")) return;
+          removeTransactionById(t.id);
+          toast("Transaction supprimee");
+        };
+        els.history.appendChild(row);
+      });
+    }
+
+    function renderTabs() {
+      const lis = activeChildId === "lisandro";
+      els.tabL.classList.toggle("active-tab", lis);
+      els.tabM.classList.toggle("active-tab", !lis);
+    }
+
+    function render() {
+      renderTabs();
+      renderSummary();
+      renderRules();
+      renderHistory();
+    }
+
+    els.tabL.onclick = () => { activeChildId = "lisandro"; render(); };
+    els.tabM.onclick = () => { activeChildId = "mila"; render(); };
+
+    els.exportBtn.onclick = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "famille-barkley-export-" + todayKey() + ".json";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast("Export termine");
+    };
+
+    els.importBtn.onclick = () => els.importFile.click();
+    els.importFile.onchange = async e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const incoming = JSON.parse(text);
+        if (!incoming.children || !incoming.transactions) throw new Error();
+        state = incoming;
+        saveState();
+        render();
+        toast("Import reussi");
+      } catch {
+        toast("Fichier invalide");
+      } finally {
+        els.importFile.value = "";
+      }
+    };
+
+    els.resetDay.onclick = () => {
+      if (!confirm("Supprimer tous les gains du jour (toggle) ?")) return;
+      const day = todayKey();
+      state.transactions = state.transactions.filter(t => !(t.date === day && t.kind === "gain"));
+      saveState();
+      render();
+      toast("Toggles du jour reinitialises");
+    };
+
+    render();
+  </script>
+</body>
+</html>
