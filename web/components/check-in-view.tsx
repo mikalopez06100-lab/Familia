@@ -1,6 +1,6 @@
 "use client";
+/* eslint-disable @next/next/no-html-link-for-pages */
 
-import Link from "next/link";
 import { ChildId } from "@/lib/types";
 import { useFamilyStore, getChild, getRulesByType } from "@/stores/useFamilyStore";
 import { childPlanning, childRoutines } from "@/lib/family-content";
@@ -33,18 +33,18 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
       <section className="flex flex-wrap gap-2">
-        <Link href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm">
+        <a href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm">
           ← Accueil
-        </Link>
-        <Link href={`/${childId}#routine`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        </a>
+        <a href={`/${childId}#routine`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Routine
-        </Link>
-        <Link href={`/${childId}#planning`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        </a>
+        <a href={`/${childId}#planning`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Planning
-        </Link>
-        <Link href="/history" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        </a>
+        <a href="/history" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Historique semaine
-        </Link>
+        </a>
       </section>
 
       <section className={`rounded-xl border ${accentSoftClass} p-4 shadow-sm`}>
@@ -180,9 +180,9 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
       </section>
 
       <section className="pb-2">
-        <Link href="/" className={`inline-block rounded-lg bg-gradient-to-r px-3 py-2 text-sm text-white ${accentClass}`}>
+        <a href="/" className={`inline-block rounded-lg bg-gradient-to-r px-3 py-2 text-sm text-white ${accentClass}`}>
           Retour à l&apos;accueil
-        </Link>
+        </a>
       </section>
     </main>
   );

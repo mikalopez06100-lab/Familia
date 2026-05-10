@@ -1,6 +1,6 @@
 "use client";
+/* eslint-disable @next/next/no-html-link-for-pages */
 
-import Link from "next/link";
 import { children } from "@/lib/mock-data";
 import { useFamilyStore } from "@/stores/useFamilyStore";
 
@@ -11,15 +11,15 @@ export default function RewardsPage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4">
       <section className="flex flex-wrap gap-2">
-        <Link href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        <a href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           ← Accueil
-        </Link>
-        <Link href="/lisandro" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        </a>
+        <a href="/lisandro" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Fiche Lisandro
-        </Link>
-        <Link href="/mila" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+        </a>
+        <a href="/mila" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Fiche Mila
-        </Link>
+        </a>
       </section>
 
       <section className="rounded-xl border border-neutral-200 bg-white p-4">
@@ -52,9 +52,9 @@ export default function RewardsPage() {
         );
       })}
 
-      <Link href="/" className="text-sm text-neutral-600 underline">
+      <a href="/" className="text-sm text-neutral-600 underline">
         Retour à l&apos;accueil
-      </Link>
+      </a>
     </main>
   );
 }
