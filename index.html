@@ -169,8 +169,6 @@
         <div class="toolbar">
           <button id="tab-lisandro" class="active-tab">Lisandro</button>
           <button id="tab-mila">Mila</button>
-          <button id="btn-export">Exporter JSON</button>
-          <button id="btn-import">Importer JSON</button>
           <button id="btn-reset-day" class="danger">Réinitialiser les toggles du jour</button>
         </div>
         <p class="muted" id="active-meta"></p>
@@ -197,7 +195,6 @@
     </section>
   </main>
 
-  <input id="import-file" type="file" accept="application/json" style="display:none" />
   <div class="toast" id="toast"></div>
 
   <script>
@@ -284,9 +281,6 @@
       tabL: document.getElementById("tab-lisandro"),
       tabM: document.getElementById("tab-mila"),
       toast: document.getElementById("toast"),
-      exportBtn: document.getElementById("btn-export"),
-      importBtn: document.getElementById("btn-import"),
-      importFile: document.getElementById("import-file"),
       resetDay: document.getElementById("btn-reset-day")
     };
 
@@ -547,36 +541,6 @@
 
     els.tabL.onclick = () => { activeChildId = "lisandro"; render(); };
     els.tabM.onclick = () => { activeChildId = "mila"; render(); };
-
-    els.exportBtn.onclick = () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "famille-barkley-export-" + todayKey() + ".json";
-      a.click();
-      URL.revokeObjectURL(url);
-      toast("Export termine");
-    };
-
-    els.importBtn.onclick = () => els.importFile.click();
-    els.importFile.onchange = async e => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const incoming = JSON.parse(text);
-        if (!incoming.children || !incoming.transactions) throw new Error();
-        state = incoming;
-        saveState();
-        render();
-        toast("Import reussi");
-      } catch {
-        toast("Fichier invalide");
-      } finally {
-        els.importFile.value = "";
-      }
-    };
 
     els.resetDay.onclick = () => {
       if (!confirm("Supprimer tous les gains du jour (toggle) ?")) return;
