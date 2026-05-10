@@ -14,6 +14,18 @@ export default function HistoryPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4">
+      <section className="flex flex-wrap gap-2">
+        <Link href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          ← Accueil
+        </Link>
+        <Link href="/lisandro" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          Fiche Lisandro
+        </Link>
+        <Link href="/mila" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          Fiche Mila
+        </Link>
+      </section>
+
       <section className="rounded-xl border border-neutral-200 bg-white p-4">
         <h1 className="text-xl font-semibold">Historique semaine</h1>
         <p className="text-sm text-neutral-600">
@@ -81,7 +93,7 @@ export default function HistoryPage() {
       })}
 
       <Link href="/" className="text-sm text-neutral-600 underline">
-        Retour dashboard
+        Retour à l&apos;accueil
       </Link>
     </main>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ChildId } from "@/lib/types";
 import { useFamilyStore, getChild, getRulesByType } from "@/stores/useFamilyStore";
 import { childPlanning, childRoutines } from "@/lib/family-content";
@@ -29,6 +30,21 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
+      <section className="flex flex-wrap gap-2">
+        <Link href="/" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          ← Accueil
+        </Link>
+        <Link href={`/${childId}#routine`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          Routine
+        </Link>
+        <Link href={`/${childId}#planning`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          Planning
+        </Link>
+        <Link href="/history" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          Historique semaine
+        </Link>
+      </section>
+
       <section className="rounded-xl border border-neutral-200 bg-white p-4">
         <h1 className="text-xl font-semibold">{child.name}</h1>
         <p className="text-sm text-neutral-500">Check-in quotidien</p>
@@ -133,7 +149,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
       </section>
 
       <section className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-3">
+        <div id="routine" className="rounded-xl border border-neutral-200 bg-white p-3 scroll-mt-4">
           <h2 className="mb-2 text-sm font-semibold">Routine quotidienne</h2>
           <ol className="space-y-2 pl-5 text-sm">
             {routines.map((step, index) => (
@@ -144,7 +160,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
           </ol>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-3">
+        <div id="planning" className="rounded-xl border border-neutral-200 bg-white p-3 scroll-mt-4">
           <h2 className="mb-2 text-sm font-semibold">Planning hebdomadaire</h2>
           <div className="space-y-2">
             {planning.map((day) => (
@@ -159,6 +175,12 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="pb-2">
+        <Link href="/" className="inline-block rounded-lg bg-neutral-900 px-3 py-2 text-sm text-white">
+          Retour à l&apos;accueil
+        </Link>
       </section>
     </main>
   );
