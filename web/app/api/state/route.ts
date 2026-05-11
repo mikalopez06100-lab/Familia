@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { toDateKey } from "@/lib/calendar-date";
 import { getSql } from "@/lib/neon";
 
 export async function GET() {
@@ -22,12 +23,12 @@ export async function GET() {
         ruleId: row.rule_id,
         label: row.label,
         value: Number(row.value),
-        date: row.date,
+        date: toDateKey(row.date),
         addedBy: row.added_by,
         createdAt: row.created_at,
       })),
       carryovers: carryovers.reduce<Record<string, number>>((acc, row) => {
-        acc[`${row.child_id}:${row.week_key}`] = Number(row.amount);
+        acc[`${row.child_id}:${toDateKey(row.week_key)}`] = Number(row.amount);
         return acc;
       }, {}),
     });

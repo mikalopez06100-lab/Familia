@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { formatLocalYmd } from "@/lib/calendar-date";
+import { formatLocalYmd, toDateKey } from "@/lib/calendar-date";
 import { children, rules } from "@/lib/mock-data";
 import { ChildId, FamilyTransaction, Rule } from "@/lib/types";
 
@@ -74,7 +74,10 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
       }
       const data = await res.json();
       set({
-        transactions: data.transactions ?? [],
+        transactions: (data.transactions ?? []).map((t: FamilyTransaction) => ({
+          ...t,
+          date: toDateKey(t.date) || t.date,
+        })),
         carryovers: data.carryovers ?? {},
         initialized: true,
         loading: false,

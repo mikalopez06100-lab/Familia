@@ -41,7 +41,9 @@ const chromeInstallHelpFr =
 export default function PwaInstallHint() {
   const [visible, setVisible] = useState(false);
   const [canPrompt, setCanPrompt] = useState(false);
+  const [installHint, setInstallHint] = useState<string | null>(null);
   const deferredRef = useRef<BeforeInstallPromptEventLike | null>(null);
+  const installBusyRef = useRef(false);
 
   const dismiss = useCallback(() => {
     try {
@@ -86,18 +88,41 @@ export default function PwaInstallHint() {
     };
   }, []);
 
-  const onInstallClick = async () => {
+  /**
+   * Pattern MDN / Chrome : enregistrer `userChoice` puis appeler `prompt()` dans le même tour
+   * synchrone que le clic (pas de `async` sur le handler).
+   */
+  const onInstallClick = () => {
+    setInstallHint(null);
     const ev = deferredRef.current;
-    if (!ev) return;
-    try {
-      await ev.prompt();
-      const { outcome } = await ev.userChoice;
+    if (!ev || installBusyRef.current) return;
+    installBusyRef.current = true;
+
+    void Promise.resolve(ev.prompt()).catch(() => {
+      installBusyRef.current = false;
       deferredRef.current = null;
       setCanPrompt(false);
-      if (outcome === "accepted") setVisible(false);
-    } catch {
-      /* ignore */
-    }
+      setInstallHint(
+        "Chrome n’a pas pu ouvrir l’installation depuis ce bouton. Menu ⋮ → « Installer l’application » ou « Ajouter à l’écran d’accueil ».",
+      );
+    });
+
+    void ev.userChoice
+      .then((choice) => {
+        installBusyRef.current = false;
+        deferredRef.current = null;
+        setCanPrompt(false);
+        if (choice.outcome === "accepted") {
+          setVisible(false);
+          return;
+        }
+        setInstallHint(
+          "Installation annulée. Réessaie plus tard ou menu ⋮ → « Installer l’application ».",
+        );
+      })
+      .catch(() => {
+        installBusyRef.current = false;
+      });
   };
 
   if (!visible) return null;
@@ -114,6 +139,7 @@ export default function PwaInstallHint() {
             <>
               <p className="font-semibold">Installer l’app sur cet appareil</p>
               <p className="mt-0.5 text-slate-600">Accès plus rapide depuis l’écran d’accueil, comme une app classique.</p>
+              {installHint && <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-950">{installHint}</p>}
             </>
           ) : (
             <>
@@ -127,11 +153,7 @@ export default function PwaInstallHint() {
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {canPrompt ? (
-            <button
-              type="button"
-              onClick={() => void onInstallClick()}
-              className="rounded-lg bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm"
-            >
+            <button type="button" onClick={onInstallClick} className="rounded-lg bg-violet-700 px-4 py-2 text-sm font-semibold text-white shadow-sm">
               Installer
             </button>
           ) : (
