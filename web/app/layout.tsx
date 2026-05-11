@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Application familiale de suivi de points Barkley",
   appleWebApp: {
     capable: true,
-    title: "Barkley",
+    title: "Famille Lopez · Barkley",
     statusBarStyle: "default",
   },
 };
