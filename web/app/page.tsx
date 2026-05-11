@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 import { children, rules } from "@/lib/mock-data";
+import { ManualBonusForm } from "@/components/manual-bonus-form";
+import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
-import { useFamilyStore } from "@/stores/useFamilyStore";
-
-const today = new Date().toISOString().slice(0, 10);
+import { getWeekKey, useFamilyStore } from "@/stores/useFamilyStore";
 
 export default function Home() {
   const [activeChildId, setActiveChildId] = useState<ChildId>("lisandro");
@@ -24,7 +24,8 @@ export default function Home() {
   const activeChild = children.find((c) => c.id === activeChildId) ?? children[0];
   const routines = childRoutines[activeChildId];
   const planning = childPlanning[activeChildId];
-  const weekKey = new Date(new Date().setHours(0, 0, 0, 0)).toISOString().slice(0, 10);
+  const todayStr = formatLocalYmd();
+  const weekKey = getWeekKey();
 
   const gains = rules.filter((r) => r.childId === activeChildId && r.type === "gain");
   const losses = rules.filter((r) => r.childId === activeChildId && r.type === "loss");
@@ -33,9 +34,9 @@ export default function Home() {
   const todayItems = useMemo(
     () =>
       transactions
-        .filter((t) => t.childId === activeChildId && t.date === today)
+        .filter((t) => t.childId === activeChildId && t.date === todayStr)
         .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
-    [activeChildId, transactions],
+    [activeChildId, transactions, todayStr],
   );
 
   const rewardTx = transactions
@@ -49,7 +50,10 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
       <section className="soft-card p-4">
         <h1 className="text-2xl font-bold text-slate-900">Dashboard famille (mode mono-page)</h1>
-        <p className="text-sm text-slate-600">Tout est accessible ici sans changer de page.</p>
+        <p className="text-sm text-slate-600">
+          Tout est accessible ici sans changer de page. Tu peux enregistrer gains, pertes et bonus au fil de la journée, sans
+          attendre un check-in du soir.
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {children.map((child) => (
             <button
@@ -135,6 +139,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ManualBonusForm childId={activeChildId} />
 
       <section className="grid gap-3 md:grid-cols-2">
         <div className="soft-card p-3">

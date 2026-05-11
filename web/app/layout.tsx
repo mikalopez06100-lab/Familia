@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import PwaInstallHint from "@/components/pwa-install-hint";
 import StateBootstrap from "@/components/state-bootstrap";
 
 const geistSans = Geist({
@@ -16,6 +17,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Famille Lopez · Barkley",
   description: "Application familiale de suivi de points Barkley",
+  appleWebApp: {
+    capable: true,
+    title: "Barkley",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#5b21b6",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -27,6 +40,7 @@ export default function RootLayout({
     <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <StateBootstrap />
+        <PwaInstallHint />
         {children}
       </body>
     </html>

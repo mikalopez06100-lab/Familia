@@ -1,8 +1,12 @@
 "use client";
 
 import { create } from "zustand";
+import { formatLocalYmd } from "@/lib/calendar-date";
 import { children, rules } from "@/lib/mock-data";
 import { ChildId, FamilyTransaction, Rule } from "@/lib/types";
+
+/** Transactions bonus manuel (hors règles prédéfinies) — plusieurs par jour possibles. */
+export const MANUAL_BONUS_RULE_ID = "manual_bonus";
 
 interface FamilyState {
   transactions: FamilyTransaction[];
@@ -12,6 +16,7 @@ interface FamilyState {
   error: string | null;
   initialize: () => Promise<void>;
   addRuleTransaction: (rule: Rule, childId: ChildId) => void;
+  addManualBonus: (childId: ChildId, reason: string, amount: number) => void;
   removeTransaction: (id: string) => void;
   dayScore: (childId: ChildId) => number;
   weekScore: (childId: ChildId) => number;
@@ -31,8 +36,6 @@ interface FamilyState {
   hasCarryoverForWeek: (childId: ChildId, weekKey: string) => boolean;
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
-
 const weekStart = (date: Date) => {
   const d = new Date(date);
   const day = d.getDay();
@@ -42,7 +45,16 @@ const weekStart = (date: Date) => {
   return d;
 };
 
-const weekKeyFromDate = (date: Date) => weekStart(date).toISOString().slice(0, 10);
+const weekEnd = (date: Date) => {
+  const start = weekStart(date);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return end;
+};
+
+/** Clé de semaine = lundi (date locale YYYY-MM-DD), cohérente avec les reports. */
+const weekKeyFromDate = (date: Date) => formatLocalYmd(weekStart(date));
 const keyFor = (childId: ChildId, weekKey: string) => `${childId}:${weekKey}`;
 const uid = () => crypto.randomUUID();
 
@@ -77,7 +89,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
   addRuleTransaction: (rule, childId) => {
     if (rule.type === "gain" && get().hasGainToday(childId, rule.id)) {
       const existing = get().transactions.find(
-        (t) => t.childId === childId && t.ruleId === rule.id && t.date === today(),
+        (t) => t.childId === childId && t.ruleId === rule.id && t.date === formatLocalYmd(),
       );
       if (existing) {
         set((state) => ({
@@ -99,7 +111,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
         ruleId: rule.id,
         label: `Rachat: ${rule.label}`,
         value: -cost,
-        date: today(),
+        date: formatLocalYmd(),
         addedBy: "michael",
         createdAt: new Date().toISOString(),
       };
@@ -125,7 +137,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
         ruleId: rule.id,
         label: rule.label,
         value: applied,
-        date: today(),
+        date: formatLocalYmd(),
         addedBy: "michael",
         createdAt: new Date().toISOString(),
       };
@@ -146,7 +158,30 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
       ruleId: rule.id,
       label: rule.label,
       value: rule.value,
-      date: today(),
+      date: formatLocalYmd(),
+      addedBy: "michael",
+      createdAt: new Date().toISOString(),
+    };
+    set((state) => ({
+      transactions: [...state.transactions, tx],
+    }));
+    fetch("/api/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tx),
+    }).catch(() => null);
+  },
+  addManualBonus: (childId, reason, amount) => {
+    const trimmed = reason.trim();
+    if (!trimmed) return;
+    const value = Math.min(50, Math.max(1, Math.floor(amount)));
+    const tx: FamilyTransaction = {
+      id: uid(),
+      childId,
+      ruleId: MANUAL_BONUS_RULE_ID,
+      label: `Bonus: ${trimmed}`,
+      value,
+      date: formatLocalYmd(),
       addedBy: "michael",
       createdAt: new Date().toISOString(),
     };
@@ -165,25 +200,25 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     }));
     fetch(`/api/transactions?id=${id}`, { method: "DELETE" }).catch(() => null);
   },
-  dayScore: (childId) =>
-    Math.max(
-      0,
-      get()
-        .transactions.filter((t) => t.childId === childId && t.date === today())
-        .reduce((acc, tx) => acc + tx.value, 0),
-    ),
+  /** Net des transactions du jour local (comme les cases « Lun … Dim » de l’historique). */
+  dayScore: (childId) => {
+    const day = formatLocalYmd();
+    return get()
+      .transactions.filter((t) => t.childId === childId && t.date === day)
+      .reduce((acc, tx) => acc + tx.value, 0);
+  },
+  /** Net de la semaine civile locale (lundi → dimanche), même périmètre que weekSummary hors report. */
   weekScore: (childId) => {
-    const start = weekStart(new Date());
-    return Math.max(
-      0,
-      get()
-        .transactions.filter((t) => {
-          if (t.childId !== childId) return false;
-          const d = new Date(`${t.date}T12:00:00`);
-          return d >= start;
-        })
-        .reduce((acc, tx) => acc + tx.value, 0),
-    );
+    const now = new Date();
+    const start = weekStart(now);
+    const end = weekEnd(now);
+    return get()
+      .transactions.filter((t) => {
+        if (t.childId !== childId) return false;
+        const d = new Date(`${t.date}T12:00:00`);
+        return d >= start && d <= end;
+      })
+      .reduce((acc, tx) => acc + tx.value, 0);
   },
   balance: (childId) =>
     Math.max(
@@ -194,14 +229,12 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     ),
   hasGainToday: (childId, ruleId) =>
     get().transactions.some(
-      (t) => t.childId === childId && t.ruleId === ruleId && t.date === today() && t.value > 0,
+      (t) => t.childId === childId && t.ruleId === ruleId && t.date === formatLocalYmd() && t.value > 0,
     ),
   weekSummary: (childId, targetDate = new Date()) => {
     const weekKey = weekKeyFromDate(targetDate);
     const start = weekStart(targetDate);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
+    const end = weekEnd(targetDate);
 
     const tx = get().transactions.filter((t) => {
       if (t.childId !== childId) return false;

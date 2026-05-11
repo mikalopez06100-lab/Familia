@@ -1,7 +1,9 @@
 "use client";
 /* eslint-disable @next/next/no-html-link-for-pages */
 
+import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
+import { ManualBonusForm } from "@/components/manual-bonus-form";
 import { useFamilyStore, getChild, getRulesByType } from "@/stores/useFamilyStore";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 
@@ -13,10 +15,10 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
   const weekScore = useFamilyStore((s) => s.weekScore(childId));
   const balance = useFamilyStore((s) => s.balance(childId));
   const hasGainToday = useFamilyStore((s) => s.hasGainToday);
-  const today = new Date().toISOString().slice(0, 10);
+  const todayStr = formatLocalYmd();
   const todayItems = useFamilyStore((s) =>
     s.transactions
-      .filter((t) => t.childId === childId && t.date === today)
+      .filter((t) => t.childId === childId && t.date === todayStr)
       .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
   );
 
@@ -49,7 +51,11 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
 
       <section className={`rounded-xl border ${accentSoftClass} p-4 shadow-sm`}>
         <h1 className="text-2xl font-bold text-slate-900">{child.name}</h1>
-        <p className="text-sm text-slate-600">Check-in quotidien</p>
+        <p className="text-sm font-medium text-slate-800">Suivi de la journée</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Tu peux valider gains, pertes et bonus dès que c&apos;est pertinent — pas besoin d&apos;attendre le soir. Un passage le
+          soir reste utile pour ce qu&apos;il reste à clôturer.
+        </p>
         <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
           <div className="rounded-md bg-white/80 px-2 py-1">Jour: <strong>{dayScore} {child.currency}</strong></div>
           <div className="rounded-md bg-white/80 px-2 py-1">Semaine: <strong>{weekScore} {child.currency}</strong></div>
@@ -121,6 +127,8 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
           </div>
         </div>
       </section>
+
+      <ManualBonusForm childId={childId} />
 
       <section className="soft-card p-3">
         <h2 className="mb-2 text-sm font-semibold">Historique du jour</h2>
