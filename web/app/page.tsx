@@ -6,6 +6,7 @@ import { children, rules } from "@/lib/mock-data";
 import ChildRecapCard from "@/components/child-recap-card";
 import { ManualBonusForm } from "@/components/manual-bonus-form";
 import ScreenTimeRules from "@/components/screen-time-rules";
+import SpendingRecap from "@/components/spending-recap";
 import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
 import { useFamilyStore } from "@/stores/useFamilyStore";
@@ -33,10 +34,6 @@ export default function Home() {
         .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
     [activeChildId, transactions, todayStr],
   );
-
-  const rewardTx = transactions
-    .filter((t) => t.childId === activeChildId && t.label.startsWith("Rachat:"))
-    .slice(0, 8);
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
@@ -169,9 +166,10 @@ export default function Home() {
         <ScreenTimeRules childId={activeChildId} />
       </section>
 
-      <section className="grid gap-3 md:grid-cols-2">
-        <div className="soft-card p-3">
-          <h3 className="mb-2 text-sm font-semibold">Historique du jour</h3>
+      <SpendingRecap />
+
+      <section className="soft-card p-3">
+        <h3 className="mb-2 text-sm font-semibold">Historique du jour — {activeChild.name}</h3>
           <div className="space-y-2">
             {todayItems.length === 0 && <p className="text-sm text-neutral-500">Aucune transaction aujourd&apos;hui.</p>}
             {todayItems.map((item) => (
@@ -196,22 +194,11 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="soft-card p-3">
-          <h3 className="mb-2 text-sm font-semibold">Récompenses rachetées</h3>
-          <div className="space-y-2">
-            {rewardTx.length === 0 && <p className="text-sm text-neutral-500">Aucun rachat.</p>}
-            {rewardTx.map((r) => (
-              <div key={r.id} className="rounded-lg border border-neutral-200 p-2 text-sm">
-                <p className="font-medium">{r.label}</p>
-                <p className="text-xs text-neutral-500">
-                  {new Date(r.createdAt).toLocaleString("fr-FR")} · {r.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <p className="mt-2 text-xs text-neutral-500">
+          <a href="/rewards" className="underline">
+            Page dédiée aux dépenses avec dates
+          </a>
+        </p>
       </section>
 
       <section className="soft-card p-3">
