@@ -35,17 +35,39 @@ export default function Home() {
     [activeChildId, transactions, todayStr],
   );
 
+  const navLinks = [
+    { href: "#recap", label: "Récap" },
+    { href: "#saisie", label: "Saisie" },
+    { href: "#routine", label: "Routine" },
+    { href: "#depenses", label: "Dépenses" },
+    { href: "#historique", label: "Historique" },
+    { href: "#regles", label: "Règles" },
+  ];
+
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
-      <header className="sticky top-0 z-10 -mx-4 border-b border-neutral-200/80 bg-[#faf7f2]/95 px-4 pb-4 pt-2 backdrop-blur-sm">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 pb-28">
+      <header className="soft-card p-4">
         <h1 className="text-2xl font-bold tracking-wide text-slate-900">LOPEZ FAMILIA</h1>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          {children.map((child) => (
-            <ChildRecapCard key={child.id} childId={child.id} />
+        <nav className="mt-3 flex flex-wrap gap-1.5" aria-label="Sections de la page">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-neutral-50"
+            >
+              {link.label}
+            </a>
           ))}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span className="self-center text-xs font-medium text-neutral-500">Saisie pour :</span>
+        </nav>
+        <section id="recap" className="mt-4 scroll-mt-4">
+          <div className="grid gap-3 md:grid-cols-2">
+            {children.map((child) => (
+              <ChildRecapCard key={child.id} childId={child.id} />
+            ))}
+          </div>
+        </section>
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-neutral-200/80 pt-3">
+          <span className="text-xs font-medium text-neutral-500">Saisie pour :</span>
           {children.map((child) => (
             <button
               key={child.id}
@@ -65,7 +87,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="grid gap-3 md:grid-cols-3">
+      <section id="saisie" className="scroll-mt-4 grid gap-3 md:grid-cols-3">
         <p className="text-sm font-semibold text-slate-700 md:col-span-3">{activeChild.name}</p>
         <div className="soft-card p-3">
           <h3 className="mb-2 text-sm font-semibold">Gains (toggle)</h3>
@@ -136,7 +158,7 @@ export default function Home() {
 
       <ManualBonusForm childId={activeChildId} />
 
-      <section className="grid gap-3 md:grid-cols-2">
+      <section id="routine" className="scroll-mt-4 grid gap-3 md:grid-cols-2">
         <div className="soft-card p-3">
           <h3 className="mb-2 text-sm font-semibold">Routine quotidienne</h3>
           <ol className="space-y-2 pl-5 text-sm">
@@ -166,9 +188,9 @@ export default function Home() {
         <ScreenTimeRules childId={activeChildId} />
       </section>
 
-      <SpendingRecap />
+      <SpendingRecap limit={12} />
 
-      <section className="soft-card p-3">
+      <section id="historique" className="soft-card scroll-mt-4 p-3">
         <h3 className="mb-2 text-sm font-semibold">Historique du jour — {activeChild.name}</h3>
           <div className="space-y-2">
             {todayItems.length === 0 && <p className="text-sm text-neutral-500">Aucune transaction aujourd&apos;hui.</p>}
@@ -195,13 +217,13 @@ export default function Home() {
             ))}
           </div>
         <p className="mt-2 text-xs text-neutral-500">
-          <a href="/rewards" className="underline">
-            Page dédiée aux dépenses avec dates
+          <a href="#depenses" className="underline">
+            Voir le récap des dépenses avec dates
           </a>
         </p>
       </section>
 
-      <section className="soft-card p-3">
+      <section id="regles" className="soft-card scroll-mt-4 p-3">
         <h3 className="mb-3 text-sm font-semibold">Toutes les règles (Lisandro + Mila)</h3>
         <div className="grid gap-3 md:grid-cols-2">
           {children.map((child) => {

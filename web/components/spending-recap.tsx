@@ -47,9 +47,12 @@ export default function SpendingRecap({
   }, [transactions, childId, limit]);
 
   return (
-    <section className="soft-card p-3">
+    <section id="depenses" className="soft-card scroll-mt-4 p-3">
       <h3 className="mb-1 text-sm font-semibold">Points / étoiles dépensés</h3>
-      <p className="mb-3 text-xs text-neutral-600">Récompenses rachetées et pertes enregistrées, avec la date du jour.</p>
+      <p className="mb-3 text-xs text-neutral-600">
+        Récompenses rachetées et pertes enregistrées, avec la date du jour.
+        {limit !== undefined ? ` (${limit} dernières par enfant — défilez la liste ou consultez l’historique complet).` : ""}
+      </p>
       <div className="grid gap-4 md:grid-cols-2">
         {byChild.map(({ child, rows, total, totalSpent }) => {
           const accent =
