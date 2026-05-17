@@ -15,6 +15,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
   const weekScore = useFamilyStore((s) => s.weekScore(childId));
   const balance = useFamilyStore((s) => s.balance(childId));
   const hasGainToday = useFamilyStore((s) => s.hasGainToday);
+  const hasRuleToday = useFamilyStore((s) => s.hasRuleToday);
   const todayStr = formatLocalYmd();
   const todayItems = useFamilyStore((s) =>
     s.transactions
@@ -87,13 +88,17 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         </div>
 
         <div className="soft-card p-3">
-          <h2 className="mb-2 text-sm font-semibold">Pertes (multiples)</h2>
+          <h2 className="mb-2 text-sm font-semibold">Pertes (toggle, 1/jour)</h2>
           <div className="space-y-2">
             {losses.map((rule) => (
               <button
                 key={rule.id}
                 onClick={() => addRuleTransaction(rule, childId)}
-                className="flex w-full items-center justify-between rounded-lg border border-red-200 bg-red-50/60 px-3 py-2 text-left text-sm"
+                className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm ${
+                  hasRuleToday(childId, rule.id)
+                    ? "border-red-500 bg-red-50"
+                    : "border-red-200 bg-red-50/60"
+                }`}
               >
                 <span>{rule.label}</span>
                 <span className="rounded-full bg-red-100 px-2 py-0.5 font-semibold text-red-800">
@@ -105,17 +110,20 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         </div>
 
         <div className="soft-card p-3">
-          <h2 className="mb-2 text-sm font-semibold">Récompenses</h2>
+          <h2 className="mb-2 text-sm font-semibold">Récompenses (toggle, 1/jour)</h2>
           <div className="space-y-2">
             {rewards.map((rule) => {
               const cost = rule.rewardCost ?? 0;
+              const boughtToday = hasRuleToday(childId, rule.id);
               const canBuy = balance >= cost;
               return (
                 <button
                   key={rule.id}
                   onClick={() => addRuleTransaction(rule, childId)}
-                  disabled={!canBuy}
-                  className="flex w-full items-center justify-between rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-left text-sm disabled:opacity-50"
+                  disabled={!canBuy && !boughtToday}
+                  className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm disabled:opacity-50 ${
+                    boughtToday ? "border-amber-500 bg-amber-50" : "border-amber-200 bg-amber-50/60"
+                  }`}
                 >
                   <span>{rule.label}</span>
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">

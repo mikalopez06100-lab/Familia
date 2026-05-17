@@ -22,6 +22,8 @@ interface FamilyState {
   weekScore: (childId: ChildId) => number;
   balance: (childId: ChildId) => number;
   hasGainToday: (childId: ChildId, ruleId: string) => boolean;
+  /** Au moins une transaction pour cette règle aujourd’hui (gain, perte ou récompense). */
+  hasRuleToday: (childId: ChildId, ruleId: string) => boolean;
   weekSummary: (
     childId: ChildId,
     targetDate?: Date,
@@ -58,6 +60,15 @@ const weekKeyFromDate = (date: Date) => formatLocalYmd(weekStart(date));
 const keyFor = (childId: ChildId, weekKey: string) => `${childId}:${weekKey}`;
 const uid = () => crypto.randomUUID();
 
+const findTodayRuleTx = (
+  transactions: FamilyTransaction[],
+  childId: ChildId,
+  ruleId: string,
+) => {
+  const day = formatLocalYmd();
+  return transactions.find((t) => t.childId === childId && t.ruleId === ruleId && t.date === day);
+};
+
 export const useFamilyStore = create<FamilyState>((set, get) => ({
   transactions: [],
   carryovers: {},
@@ -90,10 +101,8 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     }
   },
   addRuleTransaction: (rule, childId) => {
-    if (rule.type === "gain" && get().hasGainToday(childId, rule.id)) {
-      const existing = get().transactions.find(
-        (t) => t.childId === childId && t.ruleId === rule.id && t.date === formatLocalYmd(),
-      );
+    if (get().hasRuleToday(childId, rule.id)) {
+      const existing = findTodayRuleTx(get().transactions, childId, rule.id);
       if (existing) {
         set((state) => ({
           transactions: state.transactions.filter((t) => t.id !== existing.id),
@@ -234,6 +243,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     get().transactions.some(
       (t) => t.childId === childId && t.ruleId === ruleId && t.date === formatLocalYmd() && t.value > 0,
     ),
+  hasRuleToday: (childId, ruleId) => findTodayRuleTx(get().transactions, childId, ruleId) !== undefined,
   weekSummary: (childId, targetDate = new Date()) => {
     const weekKey = weekKeyFromDate(targetDate);
     const start = weekStart(targetDate);
