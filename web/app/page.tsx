@@ -3,32 +3,25 @@
 import { useMemo, useState } from "react";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 import { children, rules } from "@/lib/mock-data";
+import ChildRecapCard from "@/components/child-recap-card";
 import { ManualBonusForm } from "@/components/manual-bonus-form";
 import ScreenTimeRules from "@/components/screen-time-rules";
 import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
-import { getWeekKey, useFamilyStore } from "@/stores/useFamilyStore";
+import { useFamilyStore } from "@/stores/useFamilyStore";
 
 export default function Home() {
   const [activeChildId, setActiveChildId] = useState<ChildId>("lisandro");
   const transactions = useFamilyStore((s) => s.transactions);
   const addRuleTransaction = useFamilyStore((s) => s.addRuleTransaction);
   const removeTransaction = useFamilyStore((s) => s.removeTransaction);
-  const dayScore = useFamilyStore((s) => s.dayScore(activeChildId));
-  const weekScore = useFamilyStore((s) => s.weekScore(activeChildId));
-  const balance = useFamilyStore((s) => s.balance(activeChildId));
   const hasGainToday = useFamilyStore((s) => s.hasGainToday);
   const hasRuleToday = useFamilyStore((s) => s.hasRuleToday);
-  const weekSummary = useFamilyStore((s) => s.weekSummary);
-  const carryToNextWeek = useFamilyStore((s) => s.carryToNextWeek);
-  const hasCarryoverForWeek = useFamilyStore((s) => s.hasCarryoverForWeek);
-
+  const balance = useFamilyStore((s) => s.balance(activeChildId));
   const activeChild = children.find((c) => c.id === activeChildId) ?? children[0];
   const routines = childRoutines[activeChildId];
   const planning = childPlanning[activeChildId];
   const todayStr = formatLocalYmd();
-  const weekKey = getWeekKey();
-
   const gains = rules.filter((r) => r.childId === activeChildId && r.type === "gain");
   const losses = rules.filter((r) => r.childId === activeChildId && r.type === "loss");
   const rewards = rules.filter((r) => r.childId === activeChildId && r.type === "reward");
@@ -45,21 +38,21 @@ export default function Home() {
     .filter((t) => t.childId === activeChildId && t.label.startsWith("Rachat:"))
     .slice(0, 8);
 
-  const summary = weekSummary(activeChildId);
-  const alreadyReported = hasCarryoverForWeek(activeChildId, weekKey);
-
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
-      <section className="soft-card p-4">
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard famille (mode mono-page)</h1>
-        <p className="text-sm text-slate-600">
-          Tout est accessible ici sans changer de page. Tu peux enregistrer gains, pertes et bonus au fil de la journée, sans
-          attendre un check-in du soir.
-        </p>
+      <header className="sticky top-0 z-10 -mx-4 border-b border-neutral-200/80 bg-[#faf7f2]/95 px-4 pb-4 pt-2 backdrop-blur-sm">
+        <h1 className="text-2xl font-bold tracking-wide text-slate-900">LOPEZ FAMILIA</h1>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          {children.map((child) => (
+            <ChildRecapCard key={child.id} childId={child.id} />
+          ))}
+        </div>
         <div className="mt-3 flex flex-wrap gap-2">
+          <span className="self-center text-xs font-medium text-neutral-500">Saisie pour :</span>
           {children.map((child) => (
             <button
               key={child.id}
+              type="button"
               onClick={() => setActiveChildId(child.id)}
               className={`rounded-lg px-3 py-2 text-sm ${
                 activeChildId === child.id
@@ -73,24 +66,17 @@ export default function Home() {
             </button>
           ))}
         </div>
-      </section>
-
-      <section className="soft-card p-4">
-        <h2 className="text-xl font-semibold">{activeChild.name}</h2>
-        <div className="mt-2 grid gap-2 text-sm sm:grid-cols-3">
-          <div className="rounded-md bg-white/80 px-2 py-1">Jour: <strong>{dayScore} {activeChild.currency}</strong></div>
-          <div className="rounded-md bg-white/80 px-2 py-1">Semaine: <strong>{weekScore} {activeChild.currency}</strong></div>
-          <div className="rounded-md bg-white/80 px-2 py-1">Solde: <strong>{balance} {activeChild.currency}</strong></div>
-        </div>
-      </section>
+      </header>
 
       <section className="grid gap-3 md:grid-cols-3">
+        <p className="text-sm font-semibold text-slate-700 md:col-span-3">{activeChild.name}</p>
         <div className="soft-card p-3">
           <h3 className="mb-2 text-sm font-semibold">Gains (toggle)</h3>
           <div className="space-y-2">
             {gains.map((rule) => (
               <button
                 key={rule.id}
+                type="button"
                 onClick={() => addRuleTransaction(rule, activeChildId)}
                 className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm ${
                   hasGainToday(activeChildId, rule.id)
@@ -111,6 +97,7 @@ export default function Home() {
             {losses.map((rule) => (
               <button
                 key={rule.id}
+                type="button"
                 onClick={() => addRuleTransaction(rule, activeChildId)}
                 className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm ${
                   hasRuleToday(activeChildId, rule.id)
@@ -134,6 +121,7 @@ export default function Home() {
               return (
                 <button
                   key={rule.id}
+                  type="button"
                   onClick={() => addRuleTransaction(rule, activeChildId)}
                   disabled={balance < cost && !boughtToday}
                   className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm disabled:opacity-50 ${
@@ -156,7 +144,9 @@ export default function Home() {
           <h3 className="mb-2 text-sm font-semibold">Routine quotidienne</h3>
           <ol className="space-y-2 pl-5 text-sm">
             {routines.map((step, idx) => (
-              <li key={`${activeChildId}-r-${idx}`} className="list-decimal">{step}</li>
+              <li key={`${activeChildId}-r-${idx}`} className="list-decimal">
+                {step}
+              </li>
             ))}
           </ol>
         </div>
@@ -179,23 +169,6 @@ export default function Home() {
         <ScreenTimeRules childId={activeChildId} />
       </section>
 
-      <section className="soft-card p-3">
-        <h3 className="mb-2 text-sm font-semibold">Récap semaine</h3>
-        <div className="mb-2 grid gap-2 text-sm sm:grid-cols-4">
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2">Report entrant: <strong>{summary.carryIn}</strong></div>
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2">Gagné: <strong>+{summary.earned}</strong></div>
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2">Dépensé: <strong>-{summary.spent}</strong></div>
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2">Reste: <strong>{summary.remaining}</strong></div>
-        </div>
-        <button
-          onClick={() => carryToNextWeek(activeChildId)}
-          disabled={alreadyReported}
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
-        >
-          {alreadyReported ? "Report déjà effectué" : "Reporter le non-utilisé à la semaine suivante"}
-        </button>
-      </section>
-
       <section className="grid gap-3 md:grid-cols-2">
         <div className="soft-card p-3">
           <h3 className="mb-2 text-sm font-semibold">Historique du jour</h3>
@@ -206,12 +179,17 @@ export default function Home() {
                 <div>
                   <p className="font-medium">{item.label}</p>
                   <p className="text-xs text-neutral-500">
-                    {new Date(item.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} · {item.addedBy}
+                    {new Date(item.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                    {item.addedBy}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{item.value > 0 ? `+${item.value}` : item.value}</span>
-                  <button onClick={() => removeTransaction(item.id)} className="rounded-md border border-neutral-300 px-2 py-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => removeTransaction(item.id)}
+                    className="rounded-md border border-neutral-300 px-2 py-1 text-xs"
+                  >
                     Supprimer
                   </button>
                 </div>
@@ -227,7 +205,9 @@ export default function Home() {
             {rewardTx.map((r) => (
               <div key={r.id} className="rounded-lg border border-neutral-200 p-2 text-sm">
                 <p className="font-medium">{r.label}</p>
-                <p className="text-xs text-neutral-500">{new Date(r.createdAt).toLocaleString("fr-FR")} · {r.value}</p>
+                <p className="text-xs text-neutral-500">
+                  {new Date(r.createdAt).toLocaleString("fr-FR")} · {r.value}
+                </p>
               </div>
             ))}
           </div>
@@ -248,7 +228,10 @@ export default function Home() {
                 <p className="mb-1 text-xs font-semibold text-emerald-700">Gains</p>
                 <ul className="mb-3 space-y-1 text-xs text-neutral-700">
                   {childGains.map((r) => (
-                    <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-emerald-100 bg-emerald-50 px-2 py-1">
+                    <li
+                      key={r.id}
+                      className="flex items-center justify-between gap-2 rounded border border-emerald-100 bg-emerald-50 px-2 py-1"
+                    >
                       <span>{r.label}</span>
                       <span className="font-semibold">+{r.value}</span>
                     </li>
@@ -258,7 +241,10 @@ export default function Home() {
                 <p className="mb-1 text-xs font-semibold text-red-700">Pertes</p>
                 <ul className="mb-3 space-y-1 text-xs text-neutral-700">
                   {childLosses.map((r) => (
-                    <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-red-100 bg-red-50 px-2 py-1">
+                    <li
+                      key={r.id}
+                      className="flex items-center justify-between gap-2 rounded border border-red-100 bg-red-50 px-2 py-1"
+                    >
                       <span>{r.label}</span>
                       <span className="font-semibold">{r.value}</span>
                     </li>
@@ -268,7 +254,10 @@ export default function Home() {
                 <p className="mb-1 text-xs font-semibold text-amber-700">Récompenses</p>
                 <ul className="space-y-1 text-xs text-neutral-700">
                   {childRewards.map((r) => (
-                    <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-amber-100 bg-amber-50 px-2 py-1">
+                    <li
+                      key={r.id}
+                      className="flex items-center justify-between gap-2 rounded border border-amber-100 bg-amber-50 px-2 py-1"
+                    >
                       <span>{r.label}</span>
                       <span className="font-semibold">-{r.rewardCost ?? 0}</span>
                     </li>
