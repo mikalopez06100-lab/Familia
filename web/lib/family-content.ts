@@ -30,10 +30,10 @@ export const childPlanning: Record<ChildId, PlanningDay[]> = {
   lisandro: [
     { day: "Lun", events: ["Routine retour", "Douche", "20h téléphone", "Bilan Barkley (journée ou soir)"] },
     { day: "Mar", events: ["Routine retour", "Douche", "20h téléphone", "Bilan Barkley (journée ou soir)"] },
-    { day: "Mer", events: ["Poubelles plastique", "Douche", "20h téléphone", "Comptage points (journée ou soir)"] },
+    { day: "Mer", events: ["Cours matin seulement", "Forfait écrans après-midi (voir règles)", "Douche", "20h téléphone", "Comptage points (journée ou soir)"] },
     { day: "Jeu", events: ["Routine retour", "Douche", "20h téléphone", "Bilan Barkley (journée ou soir)"] },
     { day: "Ven", events: ["Routine retour", "Douche", "Film famille 20h30"] },
-    { day: "Sam", events: ["Lutte 17h", "Tâche salle de bain (tour)", "Écrans limités"] },
+    { day: "Sam", events: ["Lutte 17h", "Tâche salle de bain (tour)", "Forfait écrans week-end"] },
     { day: "Dim", events: ["Douche", "Réunion famille 18h", "Préparation semaine"] },
   ],
   mila: [
@@ -42,7 +42,7 @@ export const childPlanning: Record<ChildId, PlanningDay[]> = {
     { day: "Mer", events: ["Ortho 14h", "Douche + cheveux", "Comptage étoiles (journée ou soir)"] },
     { day: "Jeu", events: ["Routine retour", "Douche", "Bilan Barkley (journée ou soir)"] },
     { day: "Ven", events: ["Ortho 18h", "Douche", "Film famille 20h30"] },
-    { day: "Sam", events: ["Douche + cheveux", "Écrans limités", "Temps calme"] },
+    { day: "Sam", events: ["Douche + cheveux", "Forfait écrans week-end", "Temps calme"] },
     { day: "Dim", events: ["Douche", "Réunion famille 18h", "Préparation cartable"] },
   ],
 };

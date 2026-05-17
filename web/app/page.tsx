@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 import { children, rules } from "@/lib/mock-data";
 import { ManualBonusForm } from "@/components/manual-bonus-form";
+import ScreenTimeRules from "@/components/screen-time-rules";
 import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
 import { getWeekKey, useFamilyStore } from "@/stores/useFamilyStore";
@@ -174,6 +175,8 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        <ScreenTimeRules childId={activeChildId} />
       </section>
 
       <section className="soft-card p-3">

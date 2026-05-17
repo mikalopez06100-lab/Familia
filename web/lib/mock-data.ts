@@ -18,7 +18,7 @@ export const rules: Rule[] = [
   { id: "l_loss_4", childId: "lisandro", label: "Attitude irrespectueuse", value: -5, type: "loss" },
   { id: "l_loss_5", childId: "lisandro", label: "Téléphone utilisé après 20h", value: -10, type: "loss" },
   { id: "l_reward_1", childId: "lisandro", label: "Choix du film vendredi", value: 0, rewardCost: 10, type: "reward" },
-  { id: "l_reward_2", childId: "lisandro", label: "+30 min écrans samedi (tél, console, etc.)", value: 0, rewardCost: 15, type: "reward" },
+  { id: "l_reward_2", childId: "lisandro", label: "+30 min écrans samedi (tél, tablette, TV, Switch…)", value: 0, rewardCost: 15, type: "reward" },
   { id: "l_reward_3", childId: "lisandro", label: "Sortie avec les amis (2h)", value: 0, rewardCost: 20, type: "reward" },
   { id: "l_reward_4", childId: "lisandro", label: "Argent de poche +5€", value: 0, rewardCost: 30, type: "reward" },
   { id: "l_reward_5", childId: "lisandro", label: "Activité spéciale", value: 0, rewardCost: 50, type: "reward" },
@@ -36,7 +36,7 @@ export const rules: Rule[] = [
   { id: "m_loss_4", childId: "mila", label: "Comportement irrespectueux", value: -3, type: "loss" },
   { id: "m_reward_1", childId: "mila", label: "Autocollant collection", value: 0, rewardCost: 5, type: "reward" },
   { id: "m_reward_2", childId: "mila", label: "Choix du dessert dimanche", value: 0, rewardCost: 8, type: "reward" },
-  { id: "m_reward_3", childId: "mila", label: "30 min dessin animé choisi", value: 0, rewardCost: 10, type: "reward" },
+  { id: "m_reward_3", childId: "mila", label: "+30 min écrans (tablette, TV, Switch…)", value: 0, rewardCost: 10, type: "reward" },
   { id: "m_reward_4", childId: "mila", label: "Activité spéciale avec un parent", value: 0, rewardCost: 15, type: "reward" },
   { id: "m_reward_5", childId: "mila", label: "Invitation amie à la maison", value: 0, rewardCost: 20, type: "reward" },
 ];

@@ -4,6 +4,7 @@
 import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
 import { ManualBonusForm } from "@/components/manual-bonus-form";
+import ScreenTimeRules from "@/components/screen-time-rules";
 import { useFamilyStore, getChild, getRulesByType } from "@/stores/useFamilyStore";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 
@@ -44,6 +45,9 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         </a>
         <a href={`/${childId}#planning`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Planning
+        </a>
+        <a href={`/${childId}#ecrans`} className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
+          Écrans
         </a>
         <a href="/history" className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm">
           Historique semaine
@@ -193,6 +197,8 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
             ))}
           </div>
         </div>
+
+        <ScreenTimeRules childId={childId} />
       </section>
 
       <section className="pb-2">
