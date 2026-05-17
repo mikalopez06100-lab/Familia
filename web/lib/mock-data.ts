@@ -39,4 +39,5 @@ export const rules: Rule[] = [
   { id: "m_reward_3", childId: "mila", label: "+30 min écrans (tablette, TV, Switch…)", value: 0, rewardCost: 10, type: "reward" },
   { id: "m_reward_4", childId: "mila", label: "Activité spéciale avec un parent", value: 0, rewardCost: 15, type: "reward" },
   { id: "m_reward_5", childId: "mila", label: "Invitation amie à la maison", value: 0, rewardCost: 20, type: "reward" },
+  { id: "m_reward_6", childId: "mila", label: "Activité spéciale", value: 0, rewardCost: 50, type: "reward" },
 ];
