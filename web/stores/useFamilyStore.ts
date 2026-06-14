@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { formatLocalYmd, toDateKey } from "@/lib/calendar-date";
 import { children, rules } from "@/lib/mock-data";
+import { filterAvailableRules } from "@/lib/rule-availability";
 import { ChildId, FamilyTransaction, Rule } from "@/lib/types";
 
 /** Transactions bonus manuel (hors règles prédéfinies) — plusieurs par jour possibles. */
@@ -294,4 +295,6 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
 export const getChild = (childId: ChildId) => children.find((c) => c.id === childId);
 export const getRulesByType = (childId: ChildId, type: Rule["type"]) =>
   rules.filter((r) => r.childId === childId && r.type === type);
+export const getActiveRulesByType = (childId: ChildId, type: Rule["type"], date: Date = new Date()) =>
+  filterAvailableRules(rules, childId, type, date);
 export const getWeekKey = (date = new Date()) => weekKeyFromDate(date);

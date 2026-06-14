@@ -4,10 +4,13 @@ import { useMemo, useState } from "react";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 import { children, rules } from "@/lib/mock-data";
 import ChildRecapCard from "@/components/child-recap-card";
+import DayContextBanner from "@/components/day-context-banner";
+import FamilyCalendar from "@/components/family-calendar";
 import { ManualBonusForm } from "@/components/manual-bonus-form";
 import ScreenTimeRules from "@/components/screen-time-rules";
 import SpendingRecap from "@/components/spending-recap";
 import { formatLocalYmd } from "@/lib/calendar-date";
+import { filterAvailableRules, scheduleLabel } from "@/lib/rule-availability";
 import { ChildId } from "@/lib/types";
 import { useFamilyStore } from "@/stores/useFamilyStore";
 
@@ -23,9 +26,9 @@ export default function Home() {
   const routines = childRoutines[activeChildId];
   const planning = childPlanning[activeChildId];
   const todayStr = formatLocalYmd();
-  const gains = rules.filter((r) => r.childId === activeChildId && r.type === "gain");
-  const losses = rules.filter((r) => r.childId === activeChildId && r.type === "loss");
-  const rewards = rules.filter((r) => r.childId === activeChildId && r.type === "reward");
+  const gains = useMemo(() => filterAvailableRules(rules, activeChildId, "gain"), [activeChildId]);
+  const losses = useMemo(() => filterAvailableRules(rules, activeChildId, "loss"), [activeChildId]);
+  const rewards = useMemo(() => filterAvailableRules(rules, activeChildId, "reward"), [activeChildId]);
 
   const todayItems = useMemo(
     () =>
@@ -37,6 +40,7 @@ export default function Home() {
 
   const navLinks = [
     { href: "#recap", label: "Récap" },
+    { href: "#agenda", label: "Agenda" },
     { href: "#saisie", label: "Saisie" },
     { href: "#routine", label: "Routine" },
     { href: "#depenses", label: "Dépenses" },
@@ -88,7 +92,10 @@ export default function Home() {
       </header>
 
       <section id="saisie" className="scroll-mt-4 grid gap-3 md:grid-cols-3">
-        <p className="text-sm font-semibold text-slate-700 md:col-span-3">{activeChild.name}</p>
+        <div className="md:col-span-3">
+          <DayContextBanner childId={activeChildId} />
+        </div>
+        <p className="text-sm font-semibold text-slate-700 md:col-span-3">{activeChild.name} — règles du jour</p>
         <div className="soft-card p-3">
           <h3 className="mb-2 text-sm font-semibold">Gains (toggle)</h3>
           <div className="space-y-2">
@@ -186,6 +193,7 @@ export default function Home() {
         </div>
 
         <ScreenTimeRules childId={activeChildId} />
+        <FamilyCalendar childId={activeChildId} />
       </section>
 
       <SpendingRecap limit={12} />
@@ -227,9 +235,9 @@ export default function Home() {
         <h3 className="mb-3 text-sm font-semibold">Toutes les règles (Lisandro + Mila)</h3>
         <div className="grid gap-3 md:grid-cols-2">
           {children.map((child) => {
-            const childGains = rules.filter((r) => r.childId === child.id && r.type === "gain");
-            const childLosses = rules.filter((r) => r.childId === child.id && r.type === "loss");
-            const childRewards = rules.filter((r) => r.childId === child.id && r.type === "reward");
+            const childGains = rules.filter((r) => r.childId === child.id && r.type === "gain" && !r.deprecated);
+            const childLosses = rules.filter((r) => r.childId === child.id && r.type === "loss" && !r.deprecated);
+            const childRewards = rules.filter((r) => r.childId === child.id && r.type === "reward" && !r.deprecated);
             return (
               <div key={`all-rules-${child.id}`} className="rounded-lg border border-neutral-200 bg-white p-3">
                 <h4 className="mb-2 text-sm font-semibold">{child.name}</h4>
@@ -241,7 +249,14 @@ export default function Home() {
                       key={r.id}
                       className="flex items-center justify-between gap-2 rounded border border-emerald-100 bg-emerald-50 px-2 py-1"
                     >
-                      <span>{r.label}</span>
+                      <span>
+                        {r.label}
+                        {r.schedule && r.schedule !== "always" && (
+                          <span className="mt-0.5 block text-[10px] font-normal text-neutral-500">
+                            {scheduleLabel(r.schedule)}
+                          </span>
+                        )}
+                      </span>
                       <span className="font-semibold">+{r.value}</span>
                     </li>
                   ))}
@@ -254,7 +269,14 @@ export default function Home() {
                       key={r.id}
                       className="flex items-center justify-between gap-2 rounded border border-red-100 bg-red-50 px-2 py-1"
                     >
-                      <span>{r.label}</span>
+                      <span>
+                        {r.label}
+                        {r.schedule && r.schedule !== "always" && (
+                          <span className="mt-0.5 block text-[10px] font-normal text-neutral-500">
+                            {scheduleLabel(r.schedule)}
+                          </span>
+                        )}
+                      </span>
                       <span className="font-semibold">{r.value}</span>
                     </li>
                   ))}
@@ -267,7 +289,14 @@ export default function Home() {
                       key={r.id}
                       className="flex items-center justify-between gap-2 rounded border border-amber-100 bg-amber-50 px-2 py-1"
                     >
-                      <span>{r.label}</span>
+                      <span>
+                        {r.label}
+                        {r.schedule && r.schedule !== "always" && (
+                          <span className="mt-0.5 block text-[10px] font-normal text-neutral-500">
+                            {scheduleLabel(r.schedule)}
+                          </span>
+                        )}
+                      </span>
                       <span className="font-semibold">-{r.rewardCost ?? 0}</span>
                     </li>
                   ))}

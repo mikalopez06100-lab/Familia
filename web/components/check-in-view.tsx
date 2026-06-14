@@ -4,8 +4,10 @@
 import { formatLocalYmd } from "@/lib/calendar-date";
 import { ChildId } from "@/lib/types";
 import { ManualBonusForm } from "@/components/manual-bonus-form";
+import DayContextBanner from "@/components/day-context-banner";
+import FamilyCalendar from "@/components/family-calendar";
 import ScreenTimeRules from "@/components/screen-time-rules";
-import { useFamilyStore, getChild, getRulesByType } from "@/stores/useFamilyStore";
+import { useFamilyStore, getChild, getActiveRulesByType } from "@/stores/useFamilyStore";
 import { childPlanning, childRoutines } from "@/lib/family-content";
 
 export default function CheckInView({ childId }: { childId: ChildId }) {
@@ -26,9 +28,9 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
 
   if (!child) return null;
 
-  const gains = getRulesByType(childId, "gain");
-  const losses = getRulesByType(childId, "loss");
-  const rewards = getRulesByType(childId, "reward");
+  const gains = getActiveRulesByType(childId, "gain");
+  const losses = getActiveRulesByType(childId, "loss");
+  const rewards = getActiveRulesByType(childId, "reward");
   const routines = childRoutines[childId];
   const planning = childPlanning[childId];
   const accentClass = childId === "lisandro" ? "from-violet-700 to-violet-500" : "from-teal-700 to-teal-500";
@@ -67,6 +69,8 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
           <div className="rounded-md bg-white/80 px-2 py-1">Solde: <strong>{balance} {child.currency}</strong></div>
         </div>
       </section>
+
+      <DayContextBanner childId={childId} />
 
       <section className="grid gap-3 md:grid-cols-3">
         <div className="soft-card p-3">
@@ -199,6 +203,7 @@ export default function CheckInView({ childId }: { childId: ChildId }) {
         </div>
 
         <ScreenTimeRules childId={childId} />
+        <FamilyCalendar childId={childId} />
       </section>
 
       <section className="pb-2">
