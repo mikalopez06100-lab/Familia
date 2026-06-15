@@ -1,6 +1,6 @@
 "use client";
 
-import { childScreenTimeRules, getTodayScreenAllowance, formatMinutes } from "@/lib/screen-time-rules";
+import { childScreenTimeRules, getTodayScreenAllowance, formatMinutes, canRedeemScreenTime } from "@/lib/screen-time-rules";
 import { ChildId } from "@/lib/types";
 
 export default function ScreenTimeRules({ childId }: { childId: ChildId }) {
@@ -16,7 +16,10 @@ export default function ScreenTimeRules({ childId }: { childId: ChildId }) {
         <p className="mt-1 text-xs text-neutral-700">{today.detail}</p>
       </div>
       <p className="mb-3 text-xs text-neutral-600">
-        Tous appareils : téléphone, tablette, TV, Switch, console… Les rachats « +30 min » s&apos;ajoutent au forfait du jour.
+        Tous appareils : téléphone, tablette, TV, Switch, console…
+        {canRedeemScreenTime()
+          ? " Les rachats « +30 min » s'ajoutent au forfait du jour (pas le lundi)."
+          : " Le lundi : aucun écran et pas de rachat possible."}
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {blocks.map((block) => (

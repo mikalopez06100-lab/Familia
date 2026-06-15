@@ -11,7 +11,8 @@ export type RuleSchedule =
   | "sunday"
   | "sat_sun"
   | "mila_ortho_home"
-  | "mila_ortho_session";
+  | "mila_ortho_session"
+  | "not_monday";
 
 export interface Rule {
   id: string;

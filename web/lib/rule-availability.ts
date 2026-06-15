@@ -26,6 +26,8 @@ function scheduleMatches(schedule: RuleSchedule, childId: ChildId, date: Date): 
       return childId === "mila" && milaOrthoHome;
     case "mila_ortho_session":
       return childId === "mila" && milaOrthoSession;
+    case "not_monday":
+      return weekday !== 1;
     default:
       return true;
   }
@@ -54,6 +56,7 @@ export function scheduleLabel(schedule: RuleSchedule): string {
     sat_sun: "Samedi et dimanche",
     mila_ortho_home: "Ortho à la maison (lun, mar, jeu, sam, dim)",
     mila_ortho_session: "Séance ortho (mer, ven)",
+    not_monday: "Du mardi au dimanche (pas le lundi)",
   };
   return labels[schedule];
 }

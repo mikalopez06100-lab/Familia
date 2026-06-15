@@ -8,47 +8,75 @@ export type ScreenTimeBlock = {
   items: string[];
 };
 
+const DAY_NAMES = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"] as const;
+
 /** Forfait Lisandro en semaine type école (minutes loisirs). */
-const LISANDRO_WEEKDAY_MINUTES: Record<number, number | null> = {
-  0: 120, // dim 2h
-  1: 0, // lun pas d'écrans
-  2: 60, // mar 1h
-  3: 120, // mer 2h
-  4: 60, // jeu 1h
-  5: 120, // ven 2h
-  6: 120, // sam 2h
+const LISANDRO_WEEKDAY_MINUTES: Record<number, number> = {
+  0: 120,
+  1: 0,
+  2: 60,
+  3: 120,
+  4: 60,
+  5: 120,
+  6: 120,
 };
 
+export function isMonday(date: Date = new Date()): boolean {
+  return date.getDay() === 1;
+}
+
+export function canRedeemScreenTime(date: Date = new Date()): boolean {
+  return !isMonday(date);
+}
+
+const MONDAY_SCREEN_DETAIL =
+  "Lundi : aucun écran du tout. Pas de rachat +30 min possible avec les points.";
+
 export function formatMinutes(m: number): string {
-  if (m === 0) return "0 min (pas d'écrans loisirs)";
+  if (m === 0) return "0 min (pas d'écrans)";
   const h = Math.floor(m / 60);
   const min = m % 60;
   if (min === 0) return `${h}h`;
   return `${h}h${String(min).padStart(2, "0")}`;
 }
 
+function rachatSuffix(date: Date): string {
+  return canRedeemScreenTime(date) ? " Rachat +30 min possible avec les points." : "";
+}
+
 /** Forfait du jour pour un enfant (loisirs : tél, tablette, TV, Switch…). */
 export function getTodayScreenAllowance(childId: ChildId, date: Date = new Date()) {
+  if (isMonday(date)) {
+    return {
+      label: "Lundi",
+      minutes: 0,
+      detail: MONDAY_SCREEN_DETAIL,
+      canRedeem: false,
+    };
+  }
+
   const ctx = getDayContext(date, childId);
   const weekday = date.getDay();
+  const canRedeem = true;
 
   if (childId === "lisandro") {
     if (ctx.dayKind === "vacation") {
       return {
         label: "Vacances",
         minutes: 150,
-        detail: "Max 2h30 d'écrans loisirs par jour. Rachat +30 min possible avec les points.",
+        detail: `Max 2h30 d'écrans loisirs par jour.${rachatSuffix(date)}`,
+        canRedeem,
       };
     }
     const minutes = LISANDRO_WEEKDAY_MINUTES[weekday] ?? 0;
-    const dayNames = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
     return {
       label: ctx.dayKind === "school" ? "Semaine type école" : "Sans école",
       minutes,
       detail:
         minutes === 0
-          ? `Pas d'écrans loisirs le ${dayNames[weekday]}. Rachat +30 min possible avec les points.`
-          : `Forfait ${formatMinutes(minutes)} le ${dayNames[weekday]}. Rachat +30 min possible avec les points.`,
+          ? `Pas d'écrans loisirs le ${DAY_NAMES[weekday]}.${rachatSuffix(date)}`
+          : `Forfait ${formatMinutes(minutes)} le ${DAY_NAMES[weekday]}.${rachatSuffix(date)}`,
+      canRedeem,
     };
   }
 
@@ -57,27 +85,34 @@ export function getTodayScreenAllowance(childId: ChildId, date: Date = new Date(
     return {
       label: "Vacances",
       minutes: 120,
-      detail: "Max 2h d'écrans loisirs. Rachat +30 min possible avec les points.",
+      detail: `Max 2h d'écrans loisirs.${rachatSuffix(date)}`,
+      canRedeem,
     };
   }
   if (ctx.isSchoolDay) {
     return {
       label: "Jour d'école",
       minutes: 30,
-      detail: "Max 30 min après goûter + exercices ortho faits. Rachat +30 min possible.",
+      detail: `Max 30 min après goûter + exercices ortho faits.${rachatSuffix(date)}`,
+      canRedeem,
     };
   }
   if (ctx.milaOrthoSession) {
     return {
       label: "Séance ortho",
       minutes: 45,
-      detail: "Max 45 min après les obligations du jour (ortho Adrien). Rachat +30 min possible.",
+      detail: `Max 45 min après les obligations du jour (ortho Adrien).${rachatSuffix(date)}`,
+      canRedeem,
     };
   }
   return {
     label: "Week-end / jour sans école",
     minutes: weekday === 0 ? 60 : 90,
-    detail: weekday === 0 ? "Dimanche : max 1h loisirs." : "Samedi : max 1h30 loisirs. Rachat +30 min possible.",
+    detail:
+      weekday === 0
+        ? `Dimanche : max 1h loisirs.${rachatSuffix(date)}`
+        : `Samedi : max 1h30 loisirs.${rachatSuffix(date)}`,
+    canRedeem,
   };
 }
 
@@ -85,13 +120,19 @@ export function getTodayScreenAllowance(childId: ChildId, date: Date = new Date(
 export const childScreenTimeRules: Record<ChildId, ScreenTimeBlock[]> = {
   lisandro: [
     {
+      title: "Lundi",
+      items: [
+        "Aucun écran du tout (tél, tablette, TV, Switch…).",
+        "Pas de rachat « +30 min écrans » possible le lundi.",
+      ],
+    },
+    {
       title: "Semaine type école",
       subtitle: "Collège lun–ven (mer : matin seulement)",
       items: [
-        "Lundi : pas d'écrans loisirs.",
-        "Mardi et jeudi : 1h max (tél, tablette, TV, Switch…).",
+        "Mardi et jeudi : 1h max.",
         "Mercredi, vendredi, samedi et dimanche : 2h max.",
-        "Rachat « +30 min écrans » : s'ajoute au forfait du jour.",
+        "Rachat « +30 min écrans » : du mardi au dimanche uniquement.",
         "Les écrans « famille » (film du vendredi soir, etc.) ne comptent pas dans le forfait loisirs.",
       ],
     },
@@ -107,20 +148,27 @@ export const childScreenTimeRules: Record<ChildId, ScreenTimeBlock[]> = {
     {
       title: "Vacances et jours fériés",
       items: [
-        "Max 2h30 d'écrans loisirs par jour (tous appareils confondus).",
+        "Max 2h30 d'écrans loisirs par jour (sauf lundi : aucun écran).",
         "Pas d'écran pendant les repas et 1h avant le coucher.",
-        "Rachat +30 min toujours possible avec les points.",
+        "Rachat +30 min possible du mardi au dimanche.",
       ],
     },
   ],
   mila: [
+    {
+      title: "Lundi",
+      items: [
+        "Aucun écran du tout (tablette, TV, Switch…).",
+        "Pas de rachat « +30 min écrans » possible le lundi.",
+      ],
+    },
     {
       title: "Jours d'école (lun, mar, jeu, ven)",
       subtitle: "École + activités",
       items: [
         "Pas d'écran le matin avant l'école.",
         "Goûter préparé seule + prête à l'heure le matin.",
-        "Exercices ortho à la maison : lun, mar, jeu (pas le jour de la séance).",
+        "Exercices ortho à la maison : lun, mar, jeu (pas mer/ven).",
         "Après le retour : max 30 min écrans loisirs une fois goûter + exercices faits.",
       ],
     },
@@ -139,12 +187,13 @@ export const childScreenTimeRules: Record<ChildId, ScreenTimeBlock[]> = {
         "Douches (simple + cheveux) : tous les jours.",
         "Tâche hebdo : dimanche uniquement.",
         "Samedi : max 1h30 écrans · Dimanche : max 1h.",
+        "Rachat +30 min : du mardi au dimanche uniquement.",
       ],
     },
     {
       title: "Vacances et jours fériés",
       items: [
-        "Max 2h d'écrans loisirs par jour.",
+        "Max 2h d'écrans loisirs par jour (sauf lundi : aucun écran).",
         "Sessions de 20–30 min max ; pause active entre deux sessions.",
         "Séances ortho maintenues si prévues (mer, ven).",
       ],

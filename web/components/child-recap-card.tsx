@@ -4,7 +4,7 @@ import { children } from "@/lib/mock-data";
 import { ChildId } from "@/lib/types";
 import { getWeekKey, useFamilyStore } from "@/stores/useFamilyStore";
 
-export default function ChildRecapCard({ childId }: { childId: ChildId }) {
+export default function ChildRecapCard({ childId, readOnly = false }: { childId: ChildId; readOnly?: boolean }) {
   const child = children.find((c) => c.id === childId);
   const transactions = useFamilyStore((s) => s.transactions);
   const dayScore = useFamilyStore((s) => s.dayScore(childId));
@@ -53,14 +53,16 @@ export default function ChildRecapCard({ childId }: { childId: ChildId }) {
           Reste : <strong>{summary.remaining}</strong>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() => carryToNextWeek(childId)}
-        disabled={alreadyReported}
-        className="mt-2 w-full rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-xs disabled:opacity-50"
-      >
-        {alreadyReported ? "Report déjà effectué" : "Reporter le non-utilisé"}
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={() => carryToNextWeek(childId)}
+          disabled={alreadyReported}
+          className="mt-2 w-full rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-xs disabled:opacity-50"
+        >
+          {alreadyReported ? "Report déjà effectué" : "Reporter le non-utilisé"}
+        </button>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import CheckInView from "@/components/check-in-view";
+import ChildReadOnlyView from "@/components/child-read-only-view";
 
 export default function LisandroPage() {
-  return <CheckInView childId="lisandro" />;
+  return <ChildReadOnlyView childId="lisandro" />;
 }

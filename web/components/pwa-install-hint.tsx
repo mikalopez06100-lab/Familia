@@ -1,10 +1,37 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
-const STORAGE_KEY = "familia-pwa-install-dismissed-at";
 const DISMISS_DAYS = 14;
 const MANUAL_HINT_MS = 2800;
+
+type HintConfig = {
+  storageKey: string;
+  titlePrompt: string;
+  subtitlePrompt: string;
+  titleManual: string;
+  subtitleManual: string;
+};
+
+const HINT_CONFIGS: Record<string, HintConfig> = {
+  parent: {
+    storageKey: "familia-pwa-install-dismissed-at",
+    titlePrompt: "Installer l’app sur cet appareil",
+    subtitlePrompt: "Accès plus rapide depuis l’écran d’accueil, comme une app classique.",
+    titleManual: "Raccourci sur l’écran d’accueil",
+    subtitleManual:
+      "Dans Chrome : menu ⋮ puis « Installer l’application » ou « Ajouter à l’écran d’accueil ».",
+  },
+  lisandro: {
+    storageKey: "lisandro-pwa-install-dismissed-at",
+    titlePrompt: "Installer mon app sur ce téléphone",
+    subtitlePrompt: "Voir tes points et ta routine directement depuis l’écran d’accueil.",
+    titleManual: "Ajouter à l’écran d’accueil",
+    subtitleManual:
+      "Dans Chrome : menu ⋮ puis « Installer l’application » ou « Ajouter à l’écran d’accueil ».",
+  },
+};
 
 type BeforeInstallPromptEventLike = Event & {
   prompt: () => Promise<void>;
@@ -23,9 +50,9 @@ function isStandalone(): boolean {
   return nav.standalone === true;
 }
 
-function wasDismissedRecently(): boolean {
+function wasDismissedRecently(storageKey: string): boolean {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (!raw) return false;
     const ts = parseInt(raw, 10);
     if (Number.isNaN(ts)) return false;
@@ -39,6 +66,10 @@ const chromeInstallHelpFr =
   "https://support.google.com/chrome/answer/9658361?hl=fr&co=GENIE.Platform%3DAndroid";
 
 export default function PwaInstallHint() {
+  const pathname = usePathname();
+  const variant = pathname?.startsWith("/lisandro") ? "lisandro" : "parent";
+  const config = HINT_CONFIGS[variant];
+
   const [visible, setVisible] = useState(false);
   const [canPrompt, setCanPrompt] = useState(false);
   const [installHint, setInstallHint] = useState<string | null>(null);
@@ -47,15 +78,15 @@ export default function PwaInstallHint() {
 
   const dismiss = useCallback(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      localStorage.setItem(config.storageKey, String(Date.now()));
     } catch {
       /* ignore */
     }
     setVisible(false);
-  }, []);
+  }, [config.storageKey]);
 
   useEffect(() => {
-    if (!isAndroid() || isStandalone() || wasDismissedRecently()) return;
+    if (!isAndroid() || isStandalone() || wasDismissedRecently(config.storageKey)) return;
 
     let cancelled = false;
 
@@ -76,7 +107,7 @@ export default function PwaInstallHint() {
     }
 
     const timer = window.setTimeout(() => {
-      if (!cancelled && !deferredRef.current && !wasDismissedRecently()) {
+      if (!cancelled && !deferredRef.current && !wasDismissedRecently(config.storageKey)) {
         setVisible(true);
       }
     }, MANUAL_HINT_MS);
@@ -86,7 +117,7 @@ export default function PwaInstallHint() {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.clearTimeout(timer);
     };
-  }, []);
+  }, [config.storageKey]);
 
   /**
    * Pattern MDN / Chrome : enregistrer `userChoice` puis appeler `prompt()` dans le même tour
@@ -137,16 +168,22 @@ export default function PwaInstallHint() {
         <div className="min-w-0 text-sm text-slate-800">
           {canPrompt ? (
             <>
-              <p className="font-semibold">Installer l’app sur cet appareil</p>
-              <p className="mt-0.5 text-slate-600">Accès plus rapide depuis l’écran d’accueil, comme une app classique.</p>
+              <p className="font-semibold">{config.titlePrompt}</p>
+              <p className="mt-0.5 text-slate-600">{config.subtitlePrompt}</p>
               {installHint && <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-950">{installHint}</p>}
             </>
           ) : (
             <>
-              <p className="font-semibold">Raccourci sur l’écran d’accueil</p>
+              <p className="font-semibold">{config.titleManual}</p>
               <p className="mt-0.5 text-slate-600">
-                Dans Chrome : menu <span className="whitespace-nowrap font-mono text-xs">⋮</span> puis «&nbsp;Installer
-                l&apos;application&nbsp;» ou «&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;».
+                {variant === "parent" ? (
+                  <>
+                    Dans Chrome : menu <span className="whitespace-nowrap font-mono text-xs">⋮</span> puis «&nbsp;Installer
+                    l&apos;application&nbsp;» ou «&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;».
+                  </>
+                ) : (
+                  config.subtitleManual
+                )}
               </p>
             </>
           )}

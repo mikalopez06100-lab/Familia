@@ -52,6 +52,12 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 pb-28">
       <header className="soft-card p-4">
         <h1 className="text-2xl font-bold tracking-wide text-slate-900">LOPEZ FAMILIA</h1>
+        <p className="mt-1 text-xs text-neutral-500">
+          App Lisandro (lecture seule) :{" "}
+          <a href="/lisandro" className="font-medium text-violet-700 underline">
+            /lisandro
+          </a>
+        </p>
         <nav className="mt-3 flex flex-wrap gap-1.5" aria-label="Sections de la page">
           {navLinks.map((link) => (
             <a

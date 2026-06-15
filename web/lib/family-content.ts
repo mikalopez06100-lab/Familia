@@ -13,7 +13,7 @@ export const childRoutines: Record<ChildId, string[]> = {
     "Devoirs dans le séjour ou la cuisine (sem.) / devoirs week-end le dimanche",
     "Préparer le cartable du lendemain (jours d'école)",
     "Respecter le forfait écrans du jour (voir agenda)",
-    "Rachat +30 min possible avec les points si le forfait est épuisé",
+    "Rachat +30 min possible avec les points du mardi au dimanche (pas le lundi)",
   ],
   mila: [
     "Sac posé et chaussures rangées (jours d'école)",
@@ -30,7 +30,7 @@ export const childPlanning: Record<ChildId, PlanningDay[]> = {
   lisandro: [
     {
       day: "Lun",
-      events: ["École", "Routine retour", "Pas d'écrans loisirs", "Bilan Barkley (journée ou soir)"],
+      events: ["École", "Routine retour", "Aucun écran", "Pas de rachat écrans", "Bilan Barkley (journée ou soir)"],
     },
     {
       day: "Mar",
@@ -60,7 +60,7 @@ export const childPlanning: Record<ChildId, PlanningDay[]> = {
   mila: [
     {
       day: "Lun",
-      events: ["École", "Exercices ortho maison", "Goûter seule", "Prête à l'heure", "Bilan Barkley"],
+      events: ["École", "Exercices ortho maison", "Goûter seule", "Prête à l'heure", "Aucun écran", "Bilan Barkley"],
     },
     {
       day: "Mar",
